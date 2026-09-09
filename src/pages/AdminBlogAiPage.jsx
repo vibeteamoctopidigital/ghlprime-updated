@@ -72,6 +72,45 @@ function formatLocalEquivalent(hour, minute) {
   return utcDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
+// The underlying schedule is always stored/sent as a 24h UTC hour (0-23) —
+// this is purely a display preference for how the admin edits that same
+// value, so it's kept in localStorage rather than as a saved setting.
+const TIME_FORMAT_STORAGE_KEY = 'ghlprime-admin-blog-ai-time-format'
+
+function loadStoredTimeFormat() {
+  if (typeof window === 'undefined') return '24h'
+  try {
+    return window.localStorage.getItem(TIME_FORMAT_STORAGE_KEY) === '12h' ? '12h' : '24h'
+  } catch {
+    return '24h'
+  }
+}
+
+function storeTimeFormat(format) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(TIME_FORMAT_STORAGE_KEY, format)
+  } catch {
+    // Best-effort — a private window or blocked storage just means the toggle doesn't persist.
+  }
+}
+
+/** 24h hour (0-23) -> { hour12: 1-12, period: 'AM'|'PM' } for the 12h picker. */
+function to12Hour(hour24) {
+  const h = ((Number(hour24) % 24) + 24) % 24
+  const period = h >= 12 ? 'PM' : 'AM'
+  const hour12 = h % 12 === 0 ? 12 : h % 12
+  return { hour12, period }
+}
+
+/** { hour12: 1-12, period: 'AM'|'PM' } -> 24h hour (0-23), for saving back to schedule_hour. */
+function to24Hour(hour12, period) {
+  const h = Number(hour12) || 12
+  const clamped = Math.min(12, Math.max(1, h))
+  if (period === 'AM') return clamped === 12 ? 0 : clamped
+  return clamped === 12 ? 12 : clamped + 12
+}
+
 function formatDateTime(iso) {
   if (!iso) return ''
   const date = new Date(iso)
@@ -106,6 +145,12 @@ export default function AdminBlogAiPage() {
   const [savingSettings, setSavingSettings] = useState(false)
   const [runningNow, setRunningNow] = useState(false)
   const [runStep, setRunStep] = useState(null)
+  const [timeFormat, setTimeFormat] = useState(loadStoredTimeFormat) // '24h' | '12h' — display-only
+
+  function handleTimeFormatChange(format) {
+    setTimeFormat(format)
+    storeTimeFormat(format)
+  }
 
   async function loadAll() {
     const [settingsRes, runsRes] = await Promise.all([
@@ -274,29 +319,88 @@ export default function AdminBlogAiPage() {
             </p>
           </div>
 
-          <label>
-            <span>Schedule hour (UTC)</span>
-            <input
-              type="number"
-              min="0"
-              max="23"
-              disabled={!settingsForm.auto_blog_enabled}
-              value={settingsForm.schedule_hour}
-              onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_hour: event.target.value }))}
-            />
-          </label>
+          <div className="full-width" style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+            <span style={{ fontSize: '.85rem', opacity: 0.75 }}>Time format:</span>
+            <button
+              type="button"
+              className={timeFormat === '24h' ? 'primary-pill' : 'secondary-pill'}
+              onClick={() => handleTimeFormatChange('24h')}
+            >
+              24-hour
+            </button>
+            <button
+              type="button"
+              className={timeFormat === '12h' ? 'primary-pill' : 'secondary-pill'}
+              onClick={() => handleTimeFormatChange('12h')}
+            >
+              AM/PM
+            </button>
+          </div>
 
-          <label>
-            <span>Schedule minute (UTC)</span>
-            <input
-              type="number"
-              min="0"
-              max="59"
-              disabled={!settingsForm.auto_blog_enabled}
-              value={settingsForm.schedule_minute}
-              onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_minute: event.target.value }))}
-            />
-          </label>
+          {timeFormat === '12h' ? (
+            <label>
+              <span>Schedule time (UTC)</span>
+              <div style={{ display: 'flex', gap: '.5rem' }}>
+                <select
+                  disabled={!settingsForm.auto_blog_enabled}
+                  value={to12Hour(settingsForm.schedule_hour).hour12}
+                  onChange={(event) => {
+                    const { period } = to12Hour(settingsForm.schedule_hour)
+                    setSettingsForm((current) => ({ ...current, schedule_hour: to24Hour(event.target.value, period) }))
+                  }}
+                >
+                  {Array.from({ length: 12 }, (_, index) => index + 1).map((hour) => (
+                    <option key={hour} value={hour}>{hour}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  disabled={!settingsForm.auto_blog_enabled}
+                  value={settingsForm.schedule_minute}
+                  onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_minute: event.target.value }))}
+                />
+                <select
+                  disabled={!settingsForm.auto_blog_enabled}
+                  value={to12Hour(settingsForm.schedule_hour).period}
+                  onChange={(event) => {
+                    const { hour12 } = to12Hour(settingsForm.schedule_hour)
+                    setSettingsForm((current) => ({ ...current, schedule_hour: to24Hour(hour12, event.target.value) }))
+                  }}
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </label>
+          ) : (
+            <>
+              <label>
+                <span>Schedule hour (UTC)</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  disabled={!settingsForm.auto_blog_enabled}
+                  value={settingsForm.schedule_hour}
+                  onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_hour: event.target.value }))}
+                />
+              </label>
+
+              <label>
+                <span>Schedule minute (UTC)</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  disabled={!settingsForm.auto_blog_enabled}
+                  value={settingsForm.schedule_minute}
+                  onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_minute: event.target.value }))}
+                />
+              </label>
+            </>
+          )}
 
           <label>
             <span>Posts per day</span>
