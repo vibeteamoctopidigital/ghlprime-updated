@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Bot, CheckCircle2, ExternalLink, Loader2, Play, XCircle } from 'lucide-react'
+import { Bot, Check, CheckCircle2, ExternalLink, Loader2, Play, XCircle } from 'lucide-react'
 import AdminShell from '../components/AdminShell'
 import { getSession, signOut } from '../lib/auth'
 import { fetchBlogAiRuns, fetchBlogAiSettings, runBlogAiNow, saveBlogAiSettings } from '../lib/blogAiApi'
@@ -13,12 +13,24 @@ import '../styles/admin-extras.css'
 // panel) lives on its own page now see AdminAiConnectionsPage.jsx since
 // the customer asked for the two concerns to be split apart.
 
+// Mirrors RUN_STEPS in the backend's blogAi.engine.ts — the engine writes
+// `current_step` onto the run row as it advances, and this page polls it.
+const RUN_STEP_LABELS = [
+  { key: 'researching', label: 'Researching topic' },
+  { key: 'writing', label: 'Writing post' },
+  { key: 'reviewing_content', label: 'Checking rules' },
+  { key: 'generating_image', label: 'Cover image' },
+  { key: 'saving_draft', label: 'Saving draft' },
+]
+
 const initialSettingsForm = {
   instructions: '',
   keywords: '',
   advanced_instructions: '',
   auto_publish: false,
-  schedule_hour: 6,
+  auto_blog_enabled: true,
+  schedule_hour: 10,
+  schedule_minute: 0,
   posts_per_day: 1,
 }
 
@@ -28,9 +40,36 @@ function mapSettingsToForm(settings) {
     keywords: settings.keywords || '',
     advanced_instructions: settings.advanced_instructions || '',
     auto_publish: Boolean(settings.auto_publish),
-    schedule_hour: settings.schedule_hour ?? 6,
+    auto_blog_enabled: settings.auto_blog_enabled !== false,
+    schedule_hour: settings.schedule_hour ?? 10,
+    schedule_minute: settings.schedule_minute ?? 0,
     posts_per_day: settings.posts_per_day ?? 1,
   }
+}
+
+// The backend's validation schema expects camelCase keys (see
+// updateSettingsSchema in blogAi.validators.ts) while this form's state and
+// the rest of the API's wire format use snake_case — this is the one place
+// that bridges the two on the way out, so a mismatch here can't silently
+// drop a field (numbers are coerced too: raw <input> values arrive as
+// strings from onChange).
+function buildSettingsPayload(form) {
+  return {
+    instructions: form.instructions,
+    keywords: form.keywords,
+    advancedInstructions: form.advanced_instructions,
+    autoBlogEnabled: form.auto_blog_enabled,
+    scheduleHour: Number(form.schedule_hour),
+    scheduleMinute: Number(form.schedule_minute),
+    postsPerDay: Number(form.posts_per_day),
+  }
+}
+
+/** UTC hour/minute -> what that same instant reads as in the admin's own browser timezone, for the helper hint under the schedule inputs. */
+function formatLocalEquivalent(hour, minute) {
+  const utcDate = new Date(Date.UTC(2000, 0, 1, Number(hour) || 0, Number(minute) || 0))
+  if (Number.isNaN(utcDate.getTime())) return ''
+  return utcDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
 function formatDateTime(iso) {
@@ -66,6 +105,7 @@ export default function AdminBlogAiPage() {
   const [status, setStatus] = useState(null) // { type: 'status' | 'error', message }
   const [savingSettings, setSavingSettings] = useState(false)
   const [runningNow, setRunningNow] = useState(false)
+  const [runStep, setRunStep] = useState(null)
 
   async function loadAll() {
     const [settingsRes, runsRes] = await Promise.all([
@@ -93,7 +133,7 @@ export default function AdminBlogAiPage() {
     setSavingSettings(true)
     setStatus(null)
 
-    const { data, error } = await saveBlogAiSettings(settingsForm)
+    const { data, error } = await saveBlogAiSettings(buildSettingsPayload(settingsForm))
 
     if (error) {
       setStatus({ type: 'error', message: error.message || 'Failed to save settings' })
@@ -108,9 +148,23 @@ export default function AdminBlogAiPage() {
 
   async function handleRunNow() {
     setRunningNow(true)
+    setRunStep(null)
     setStatus(null)
 
+    // The run is a single long request with no intermediate response, so
+    // progress comes from polling the run row the engine is updating as it
+    // moves through each phase (see RUN_STEPS in blogAi.engine.ts). The row
+    // is created before any work starts, so the newest run is this one.
+    const poll = window.setInterval(async () => {
+      const { data } = await fetchBlogAiRuns(1)
+      const latest = Array.isArray(data) ? data[0] : null
+      if (latest?.status === 'running') setRunStep(latest.current_step || null)
+    }, 2000)
+
     const { data, error } = await runBlogAiNow()
+
+    window.clearInterval(poll)
+    setRunStep(null)
 
     if (error) {
       setStatus({ type: 'error', message: error.message || 'Run failed to start' })
@@ -119,7 +173,10 @@ export default function AdminBlogAiPage() {
     }
 
     if (data.success) {
-      setStatus({ type: 'status', message: `Generated "${data.post?.title}" saved as ${data.post?.published ? 'published' : 'a draft'}.` })
+      setStatus({
+        type: 'status',
+        message: `Generated “${data.draft?.title}” — waiting for your review in the Blog Library.`,
+      })
     } else {
       setStatus({ type: 'error', message: data.error || 'Run failed' })
     }
@@ -144,6 +201,25 @@ export default function AdminBlogAiPage() {
           </button>
         </div>
       </div>
+
+      {runningNow ? (
+        <div className="admin-run-progress">
+          {RUN_STEP_LABELS.map((step, index) => {
+            const currentIndex = RUN_STEP_LABELS.findIndex((entry) => entry.key === runStep)
+            const state = currentIndex < 0
+              ? (index === 0 ? 'active' : 'pending')
+              : index < currentIndex ? 'done' : index === currentIndex ? 'active' : 'pending'
+
+            return (
+              <span key={step.key} className={`admin-run-step is-${state}`}>
+                {state === 'done' ? <Check size={13} /> : null}
+                {state === 'active' ? <Loader2 size={13} className="admin-spin" /> : null}
+                {step.label}
+              </span>
+            )
+          })}
+        </div>
+      ) : null}
 
       {status ? <div className={status.type === 'error' ? 'form-error' : 'form-status'}>{status.message}</div> : null}
 
@@ -182,14 +258,43 @@ export default function AdminBlogAiPage() {
             />
           </label>
 
+          <div className="full-width admin-team-assignment-box refined-assignment-box">
+            <label className="checkbox-row">
+              <input
+                type="checkbox"
+                checked={settingsForm.auto_blog_enabled}
+                onChange={(event) => setSettingsForm((current) => ({ ...current, auto_blog_enabled: event.target.checked }))}
+              />
+              <span>Automatic daily generation</span>
+            </label>
+            <p className="admin-empty-note">
+              {settingsForm.auto_blog_enabled
+                ? 'On: a new post generates automatically every day at the scheduled time below.'
+                : 'Off: the daily schedule is paused nothing generates on its own. "Run Now" above still works any time.'}
+            </p>
+          </div>
+
           <label>
             <span>Schedule hour (UTC)</span>
             <input
               type="number"
               min="0"
               max="23"
+              disabled={!settingsForm.auto_blog_enabled}
               value={settingsForm.schedule_hour}
               onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_hour: event.target.value }))}
+            />
+          </label>
+
+          <label>
+            <span>Schedule minute (UTC)</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              disabled={!settingsForm.auto_blog_enabled}
+              value={settingsForm.schedule_minute}
+              onChange={(event) => setSettingsForm((current) => ({ ...current, schedule_minute: event.target.value }))}
             />
           </label>
 
@@ -203,6 +308,14 @@ export default function AdminBlogAiPage() {
               onChange={(event) => setSettingsForm((current) => ({ ...current, posts_per_day: event.target.value }))}
             />
           </label>
+
+          <div className="full-width">
+            <p className="admin-empty-note">
+              That&apos;s {formatLocalEquivalent(settingsForm.schedule_hour, settingsForm.schedule_minute)} in your own timezone right now.
+              {' '}If a scheduled run fails, it automatically retries (up to 3 attempts total) before giving up for the day and emailing an alert.
+              {' '}Scheduled runs only ever use a connected Claude/Codex subscription login never a paid API key, even if one is configured as a manual-run fallback.
+            </p>
+          </div>
 
           <div className="full-width admin-team-assignment-box refined-assignment-box">
             <label className="checkbox-row">

@@ -91,6 +91,58 @@
   font-size: 0.9rem;
   padding: 0.75rem 0;
 }
+.admin-copy-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+/* Run Now step progress */
+.admin-run-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+.admin-run-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #9db2d6;
+}
+.admin-run-step.is-active {
+  border-color: rgba(96, 165, 250, 0.5);
+  background: rgba(96, 165, 250, 0.12);
+  color: #cfe2ff;
+}
+.admin-run-step.is-done {
+  border-color: rgba(141, 240, 199, 0.35);
+  color: #8df0c7;
+}
+/* AI drafts awaiting review, listed above real posts in the Blog Library */
+.admin-blog-ai-draft-row {
+  background: rgba(96, 165, 250, 0.06);
+}
+.admin-blog-status-badge.draft {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.admin-copy-row .admin-open-link {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.admin-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .admin-danger-btn {
   color: #ff9a9a;
 }

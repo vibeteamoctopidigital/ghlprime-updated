@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ExternalLink, Pencil, Plus, Sparkles, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Bot, Check, ExternalLink, Pencil, Plus, Sparkles, Trash2, X, Eye, EyeOff } from 'lucide-react'
 import AdminShell from '../components/AdminShell'
 import ImageUrlField from '../components/admin/ImageUrlField'
 import Pagination from '../components/admin/Pagination'
@@ -13,6 +13,8 @@ import {
   fetchAdminBlogPosts,
   updateBlogPost,
 } from '../lib/blogApi'
+import { approveBlogAiDraft, fetchBlogAiDrafts, rejectBlogAiDraft } from '../lib/blogAiApi'
+import '../styles/admin-extras.css'
 
 const POSTS_PER_PAGE = 15
 
@@ -84,10 +86,15 @@ export default function AdminBlogPage() {
   const [status, setStatus] = useState('')
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState(1)
+  // AI-generated posts awaiting review. They live in blog_ai_drafts, not
+  // blog_posts — approving one here is what actually creates the real post.
+  const [aiDrafts, setAiDrafts] = useState([])
+  const [draftBusyId, setDraftBusyId] = useState(null)
 
   useEffect(() => {
     getSession().then(setSession)
     fetchAdminBlogPosts().then(setPosts)
+    refreshAiDrafts()
   }, [])
 
   const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE))
@@ -113,6 +120,40 @@ export default function AdminBlogPage() {
   async function refreshPosts() {
     const data = await fetchAdminBlogPosts()
     setPosts(Array.isArray(data) ? data : [])
+  }
+
+  async function refreshAiDrafts() {
+    const { data } = await fetchBlogAiDrafts('pending_review')
+    setAiDrafts(Array.isArray(data) ? data : [])
+  }
+
+  async function handleApproveDraft(draft) {
+    setDraftBusyId(draft.id)
+    const { error } = await approveBlogAiDraft(draft.id)
+    setDraftBusyId(null)
+
+    if (error) {
+      setStatus(`Could not approve draft: ${error}`)
+      return
+    }
+
+    setStatus(`Published “${draft.title}”.`)
+    // The approved draft becomes a real post, so both lists change.
+    await Promise.all([refreshAiDrafts(), refreshPosts()])
+  }
+
+  async function handleRejectDraft(draft) {
+    setDraftBusyId(draft.id)
+    const { error } = await rejectBlogAiDraft(draft.id)
+    setDraftBusyId(null)
+
+    if (error) {
+      setStatus(`Could not reject draft: ${error}`)
+      return
+    }
+
+    setStatus(`Rejected “${draft.title}”.`)
+    await refreshAiDrafts()
   }
 
   function startCreate() {
@@ -254,6 +295,39 @@ export default function AdminBlogPage() {
                 </tr>
               </thead>
               <tbody>
+                {/* AI drafts first — they need a decision, and approving one
+                    is what turns it into a real post in the rows below. */}
+                {aiDrafts.map((draft) => (
+                  <tr key={`ai-draft-${draft.id}`} className="admin-blog-ai-draft-row">
+                    <td><strong>{draft.title}</strong></td>
+                    <td>{draft.category}</td>
+                    <td>
+                      <span className="admin-blog-status-badge draft"><Bot size={12} /> Draft (AI)</span>
+                    </td>
+                    <td>·</td>
+                    <td>{formatBlogDate(draft.created_at)}</td>
+                    <td>
+                      <div className="admin-blog-row-actions">
+                        <button
+                          type="button"
+                          className="team-edit-btn"
+                          disabled={draftBusyId === draft.id}
+                          onClick={() => handleApproveDraft(draft)}
+                        >
+                          <Check size={14} /> {draftBusyId === draft.id ? 'Working…' : 'Approve'}
+                        </button>
+                        <button
+                          type="button"
+                          className="team-edit-btn danger"
+                          disabled={draftBusyId === draft.id}
+                          onClick={() => handleRejectDraft(draft)}
+                        >
+                          <X size={14} /> Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
                 {paginatedPosts.map((post) => (
                   <tr key={post.id || post.slug}>
                     <td><strong>{post.title}</strong></td>
@@ -277,7 +351,7 @@ export default function AdminBlogPage() {
                     </td>
                   </tr>
                 ))}
-                {!posts.length ? (
+                {!posts.length && !aiDrafts.length ? (
                   <tr><td colSpan={6} className="admin-blog-empty">No posts yet. Click “New Post” to get started.</td></tr>
                 ) : null}
               </tbody>

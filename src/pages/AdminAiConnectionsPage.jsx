@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
-  Bot, ChevronRight, ExternalLink, Loader2, Plug, RefreshCw, Trash2,
+  Bot, Check, ChevronRight, Copy, ExternalLink, Loader2, Plug, RefreshCw, Trash2,
 } from 'lucide-react'
 import AdminShell from '../components/AdminShell'
 import Modal from '../components/admin/Modal'
@@ -115,6 +115,9 @@ export default function AdminAiConnectionsPage() {
   const [savingAccount, setSavingAccount] = useState(false)
   const [apiKeyForm, setApiKeyForm] = useState(initialApiKeyForm)
   const [savingApiKeyAccount, setSavingApiKeyAccount] = useState(false)
+
+  // -- Copy-to-clipboard (connect modals' auth links/codes) -----------------
+  const [copiedField, setCopiedField] = useState(null)
 
   // -- Claude "connect from this browser" (no SSH) -------------------------
   const [showClaudeConnectModal, setShowClaudeConnectModal] = useState(false)
@@ -325,6 +328,29 @@ export default function AdminAiConnectionsPage() {
       return next
     })
     setTestingAll(false)
+  }
+
+  // -- Copy-to-clipboard (connect modals' auth links/codes) -----------------
+
+  async function handleCopy(text, field) {
+    if (!text) return
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const input = document.createElement('input')
+        input.value = text
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('copy')
+        document.body.removeChild(input)
+      }
+
+      setCopiedField(field)
+      window.setTimeout(() => setCopiedField((current) => (current === field ? null : current)), 1800)
+    } catch {
+      setCopiedField(null)
+    }
   }
 
   // -- Claude "connect from this browser" (no SSH) -------------------------
@@ -658,10 +684,17 @@ export default function AdminAiConnectionsPage() {
           {claudeConnect.status === 'awaiting_code' ? (
             <>
               <p className="admin-empty-note">Open this link, log in on claude.com, then paste the resulting code below.</p>
-              <p>
+              <p className="admin-copy-row">
                 <a href={claudeConnect.url} target="_blank" rel="noreferrer" className="text-link admin-open-link">
                   {claudeConnect.url} <ExternalLink size={13} />
                 </a>
+                <button
+                  type="button"
+                  className="team-edit-btn admin-copy-btn"
+                  onClick={() => handleCopy(claudeConnect.url, 'claudeUrl')}
+                >
+                  {copiedField === 'claudeUrl' ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
+                </button>
               </p>
               <form className="admin-form-grid" onSubmit={handleSubmitClaudeConnectCode}>
                 <label className="full-width">
@@ -820,14 +853,30 @@ export default function AdminAiConnectionsPage() {
             <>
               <p className="admin-empty-note">Open this link and enter the code to approve:</p>
               {codexConnect.url ? (
-                <p>
+                <p className="admin-copy-row">
                   <a href={codexConnect.url} target="_blank" rel="noreferrer" className="text-link admin-open-link">
                     {codexConnect.url} <ExternalLink size={13} />
                   </a>
+                  <button
+                    type="button"
+                    className="team-edit-btn admin-copy-btn"
+                    onClick={() => handleCopy(codexConnect.url, 'codexUrl')}
+                  >
+                    {copiedField === 'codexUrl' ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
+                  </button>
                 </p>
               ) : null}
               {codexConnect.code ? (
-                <p style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '0.08em' }}>{codexConnect.code}</p>
+                <p className="admin-copy-row">
+                  <span style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '0.08em' }}>{codexConnect.code}</span>
+                  <button
+                    type="button"
+                    className="team-edit-btn admin-copy-btn"
+                    onClick={() => handleCopy(codexConnect.code, 'codexCode')}
+                  >
+                    {copiedField === 'codexCode' ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
+                  </button>
+                </p>
               ) : null}
               <p className="char-counter"><Loader2 size={14} className="admin-spin" /> Waiting for approval…</p>
             </>
