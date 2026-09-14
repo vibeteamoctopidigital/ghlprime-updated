@@ -86,13 +86,13 @@ export default function HeroV2({ activePill, rotatingPills }) {
         <div className="hv2-hero-photo">
           {/* <span className="hv2-eyebrow hv2-hero-photo-caption">Client Workspace We Build &amp; Manage</span> */}
           <motion.div className="hv2-hero-photo-row">
-            <img
+            <Image
               src="/ghl-launchpad.png"
               alt="A Expert CRM teams  by GHL Prime"
-      
+              fill
               preload
               fetchPriority="high"
-              // sizes="(max-width: 900px) 90vw, 640px"
+              sizes="(max-width: 900px) 90vw, 640px"
             />
           </motion.div>
         </div>

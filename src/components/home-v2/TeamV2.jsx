@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { fetchTeamMembers, fetchTeamPageExperts } from '../../lib/teamApi'
 import { socialConfig } from '../socialConfig'
@@ -11,6 +12,17 @@ import './home-v2.css'
 // admin can never silently drop a different person than the one intended.
 const HOME_EXPERT_EXCLUDE = new Set(['Habibur Rahman'])
 const HOME_EXPERT_LIMIT = 10
+
+// Home-page portraits for the two founders: background-removed cut-outs
+// (980x1176, transparent) used here instead of whatever image_url the team
+// API carries. Keyed by name for the same reason as HOME_EXPERT_EXCLUDE
+// above. Home page only -- the Team page and admin records are unchanged.
+const HOME_LEADER_PORTRAIT = {
+  'jewel rana': '/jewel-rana-2.png',
+  'niyamul islam sajal': '/niyamul-islam-sajal.png',
+}
+const leaderPortrait = (leader) =>
+  HOME_LEADER_PORTRAIT[(leader.name || '').trim().toLowerCase()] || leader.image_url
 
 // Certification marks, carried over from the previous CertificationsSection.
 const CERTS = [
@@ -64,9 +76,19 @@ export default function TeamV2() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9, delay: i * 0.1 }}
               >
-                {leader.image_url ? (
+                {leaderPortrait(leader) ? (
                   <span className="hv2-team-stage">
-                    <img src={leader.image_url} alt={leader.name} loading="lazy" decoding="async" />
+                    <Image
+                      src={leaderPortrait(leader)}
+                      alt={leader.name}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 900px) 90vw, 20rem"
+                      // Local portraits go through the optimizer (the source
+                      // PNGs are ~700KB each); an API-supplied URL on an
+                      // arbitrary host is passed through as-is.
+                      unoptimized={!leaderPortrait(leader).startsWith('/')}
+                    />
                   </span>
                 ) : null}
                 <div className="hv2-team-body">

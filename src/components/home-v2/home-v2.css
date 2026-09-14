@@ -857,15 +857,22 @@
   box-shadow: 0 1px 3px rgba(15, 31, 53, .04), 0 20px 40px -30px rgba(15, 31, 53, .5);
   transition: transform .35s cubic-bezier(.22,1,.36,1), border-color .35s ease, box-shadow .35s ease;
 }
-/* Portrait sits on a soft stage rather than in a circle, so cut-out photos
-   keep their shape and read as a headshot rather than an avatar. */
+/* Cut-out portrait (transparent background) standing on a soft gradient
+   stage, so it reads as a headshot rather than an avatar.
+
+   The stage takes the portraits' own 5:6 shape (980x1176) instead of a fixed
+   15rem height: the photo fills the full card width and grows with it, rather
+   than being shrunk into a short box with empty bands either side. `contain`
+   + bottom anchoring never crops -- shoulders sit on the stage floor and a
+   photo of any other shape just gains stage above it, never loses a head.
+   next/image `fill` supplies the absolute 100%/100% box these rules act on. */
 .hv2-team-stage {
-  display: grid; place-items: end center; height: 15rem; margin-bottom: 1.1rem;
+  display: block; position: relative; aspect-ratio: 5 / 6; margin-bottom: 1.1rem;
   border-radius: 16px; overflow: hidden;
   background: linear-gradient(180deg, #f2f7fe, #ffffff 78%);
 }
 .hv2-team-stage img {
-  max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain;
+  object-fit: contain; object-position: center bottom;
 }
 .hv2-team-body p {
   margin: .9rem 0 0; font-size: .9rem; line-height: 1.62; color: var(--body);
