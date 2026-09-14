@@ -84,31 +84,15 @@ export default function HeroV2({ activePill, rotatingPills }) {
         </div>
 
         <div className="hv2-hero-photo">
-          <motion.div
-            className="hv2-hero-photo-row"
-            initial={{ opacity: 0, y: -44, scale: 0.9, rotate: -2 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 130, damping: 15, mass: 0.9, delay: 0.15 }}
-          >
-            <Image
-              src="/db3.png"
-              alt="A GoHighLevel dashboard managed by GHL Prime"
-              fill
-              priority
-              sizes="(max-width: 900px) 90vw, 640px"
-            />
-          </motion.div>
-          <motion.div
-            className="hv2-hero-photo-row"
-            initial={{ opacity: 0, y: 44, scale: 0.9, rotate: 2 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 130, damping: 15, mass: 0.9, delay: 0.3 }}
-          >
-            <Image
-              src="/dashboard5.png"
-              alt="A GoHighLevel reporting dashboard managed by GHL Prime"
-              fill
-              sizes="(max-width: 900px) 90vw, 640px"
+          {/* <span className="hv2-eyebrow hv2-hero-photo-caption">Client Workspace We Build &amp; Manage</span> */}
+          <motion.div className="hv2-hero-photo-row">
+            <img
+              src="/ghl-launchpad.png"
+              alt="A Expert CRM teams  by GHL Prime"
+      
+              preload
+              fetchPriority="high"
+              // sizes="(max-width: 900px) 90vw, 640px"
             />
           </motion.div>
         </div>

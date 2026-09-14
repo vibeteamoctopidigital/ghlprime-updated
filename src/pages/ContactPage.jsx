@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
 import SiteFooter from '../components/SiteFooter'
+import '../styles/contact-page.css'
 
 const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/j53xn6YJHwIdPImV00rn/webhook-trigger/788ab1c6-9220-4731-ba35-9919821c2fe2'
 

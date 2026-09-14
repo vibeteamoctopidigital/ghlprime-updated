@@ -156,7 +156,7 @@ export default function CapabilitiesV2() {
               const RowIcon = cap.icon
               const open = i === active
               return (
-                <div className="hv2-cap-row" key={cap.title}>
+                <div className="hv2-cap-row" role="presentation" key={cap.title}>
                   <button
                     type="button"
                     role="tab"
@@ -182,7 +182,16 @@ export default function CapabilitiesV2() {
                       <motion.div
                         className="hv2-cap-inline"
                         id={`hv2-cap-inline-${i}`}
-                        role="region"
+                        // Not role="region": axe's aria-required-children
+                        // check still counts a role="region" descendant as
+                        // an effective child of the ancestor role="tablist"
+                        // even through the role="presentation" row wrapper
+                        // (presentation only strips ITS OWN role, not its
+                        // children's) -- tablist only permits role="tab"
+                        // children. This div never had an aria-label either,
+                        // so the region role wasn't exposing a meaningful
+                        // landmark anyway; aria-controls on the tab button
+                        // above already ties the two together correctly.
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}

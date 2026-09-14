@@ -193,9 +193,6 @@ export default function HomePage() {
           priceRange: '$$',
         }) }} />
 
-      <HomeSeoShell />
-
-
       <HeroV2 activePill={activePill} rotatingPills={rotatingPills} />
       <TrustBandV2 />
       <WhoWeAreV2 />
@@ -211,6 +208,14 @@ export default function HomePage() {
       <ProofV2 />
       <FinalCtaV2 />
       <FaqSection faqs={HOMEPAGE_FAQS} intro="Common questions from agencies and founders before they engage GHL Prime." />
+
+      {/* Visually-hidden, crawler-facing summary — placed after all real
+          content specifically so its h2/h3s never precede the hero's h1 in
+          document order (a real heading-outline defect: this component is
+          `inert`/hidden either way, so its position here has no visual
+          effect, only a document-order one). */}
+      <HomeSeoShell />
+
       <SiteFooter />
     </>
   )

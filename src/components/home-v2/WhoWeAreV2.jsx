@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { fetchGalleryImages } from '../../lib/galleryApi'
 import { trackPointer, resetPointer } from '../motion3d/pointer'
@@ -112,7 +113,21 @@ export default function WhoWeAreV2() {
               onClick={() => setViewing(i)}
               aria-label="View photo full screen"
             >
-              <img src={shot.image_url} alt="The GHL Prime team" loading="lazy" decoding="async" />
+              <Image
+                src={shot.image_url}
+                alt="The GHL Prime team"
+                fill
+                loading="lazy"
+                sizes="(max-width: 900px) 45vw, 320px"
+                // The three fallback shots are local files Next can actually
+                // optimize (raw PNGs on disk were 2.2-3MB each -- see the
+                // 4.3MB Lighthouse "Image" finding this fixes). Anything
+                // fetched from the gallery API is an admin-uploaded URL on
+                // an unpredictable external domain, so it's passed through
+                // unoptimized rather than requiring every future upload host
+                // to be added to next.config.js's image allowlist.
+                unoptimized={!shot.image_url.startsWith('/')}
+              />
             </button>
           ))}
         </div>

@@ -507,7 +507,7 @@ export default function App({ children }) {
       <SiteHeader />
       <ScrollToTop />
       <BackToTop />
-      {children}
+      <main>{children}</main>
       <SpeedInsights />
     </div>
   )

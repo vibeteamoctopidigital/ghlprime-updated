@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import SiteFooter from '../components/SiteFooter'
-import { CertifiedAdminOverlay, SkillsBadges } from '../components/CertificationBadges'
 import CertificationsSection from '../components/CertificationsSection'
 import { socialConfig } from '../components/socialConfig'
 import { fetchTeamMembers, fetchTeamPageExperts } from '../lib/teamApi'
@@ -246,11 +245,9 @@ export default function TeamPage() {
                 >
                   <span className="iv-expert-photo">
                     <img src={member.image_url} alt={member.name} loading="lazy" decoding="async" />
-                    {index < 5 ? <CertifiedAdminOverlay /> : null}
                   </span>
                   <span className="pv2-expert-name">{member.name}</span>
                   <span className="pv2-expert-role">{member.title}</span>
-                  <SkillsBadges personIndex={index} />
                 </motion.div>
               ))}
           </div>

@@ -148,7 +148,7 @@ export default function AgentV2() {
                 <div className="hv2-agent-point ic-hover" key={p.title}>
                   <span className={`ic hv2-agent-point-icon ${p.tone}`}><Icon size={19} /></span>
                   <div>
-                    <h4>{p.title}</h4>
+                    <h3>{p.title}</h3>
                     <p>{p.text}</p>
                   </div>
                 </div>

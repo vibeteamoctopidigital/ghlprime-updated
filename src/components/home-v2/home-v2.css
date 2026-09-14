@@ -134,25 +134,27 @@
 .hv2-trust-item { display: inline-flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--body); font-weight: 500; }
 .hv2-trust-item svg { color: #16a34a; flex: none; }
 
-/* ---------- Hero visual: two real dashboard screenshots ------------------- */
-/* Two panels stacked in a column rather than one image stretched to fill the
-   slot -- a single wide screenshot forced to match the text column's height
-   needed such a hard object-fit: cover crop that it stopped reading as a
-   dashboard. Split across two panels, each only has to cover roughly half
-   the height, which lands close enough to a real dashboard screenshot's own
-   width:height ratio that the crop is barely noticeable, and the pair still
-   fills the same vertical space the text column does. */
-.hv2-hero-photo { display: flex; flex-direction: column; gap: 1.1rem; height: 100%; }
-.hv2-hero-photo-row {
-  position: relative; flex: 1; border-radius: 18px; overflow: hidden;
-  background: #fff; border: 1px solid var(--line-strong);
-  box-shadow: 0 1px 3px rgba(15, 31, 53, .05), 0 24px 48px -30px rgba(15, 31, 53, .45);
-  aspect-ratio: 1600 / 764;
-}
-.hv2-hero-photo-row img { object-fit: cover; object-position: center; }
-@media (min-width: 1081px) {
-  .hv2-hero-photo-row { aspect-ratio: auto; }
-}
+/* ---------- Hero visual: one portrait dashboard screenshot ---------------- */
+/* ghl-launchpad.png is a tall portrait capture (656x881, ratio ~0.745) --
+   the box below used to assume a wide landscape screenshot (1600:764) with
+   object-fit: cover, which cropped a portrait image down to a sliver of
+   its actual content. object-fit: contain is a hard guarantee against
+   cropping regardless of the box's own shape.
+
+   Deliberately NO aspect-ratio on .hv2-hero-photo-row: next/image's `fill`
+   renders as an absolutely-positioned <img>, which contributes no
+   intrinsic height of its own to this box. Without aspect-ratio forcing a
+   height, this box's only real height comes from `.hv2-hero-photo`'s
+   `height: 100%` inside the grid's `align-items: stretch` row -- i.e. it
+   naturally matches the TEXT column's height instead of demanding its own
+   (taller) height and stretching the row to fit the image.
+
+   No background/border/shadow "card" here on purpose -- just the raw
+   screenshot floating on the page, with its own rounded corners. */
+.hv2-hero-photo { display: flex; flex-direction: column; gap: .9rem; height: 100%; }
+.hv2-hero-photo-caption { align-self: flex-start; }
+.hv2-hero-photo-row { position: relative; flex: 1; border-radius: 18px; overflow: hidden; }
+.hv2-hero-photo-row img { object-fit: contain; object-position: top center; }
 
 /* ---------- Hero visual: a live automation pipeline ---------------------- */
 .hv2-console {
@@ -706,7 +708,7 @@
 .hv2-agent-points { display: grid; gap: 1.1rem; margin-top: 2rem; }
 .hv2-agent-point { display: grid; grid-template-columns: 2.6rem 1fr; gap: .95rem; align-items: start; }
 .hv2-agent-point-icon { width: 2.6rem; height: 2.6rem; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
-.hv2-agent-point h4 { margin: 0 0 .25rem; font-size: 1.02rem; font-weight: 700; color: var(--navy); }
+.hv2-agent-point h3 { margin: 0 0 .25rem; font-size: 1.02rem; font-weight: 700; color: var(--navy); }
 .hv2-agent-point p { margin: 0; font-size: .94rem; line-height: 1.6; color: var(--body); }
 
 /* =========================================================================

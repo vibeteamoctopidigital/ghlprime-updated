@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SiteFooter from '../components/SiteFooter'
 import FaqSection from '../components/FaqSection'
 import { SERVICES_FAQS } from '../data/faqs'
+import '../styles/services-redesign.css'
 import { ArrowRight, BotMessageSquare, Cable, Check, HandCoins, Hammer, Minus, MessagesSquare, PanelsTopLeft, SlidersHorizontal, SquareTerminal, Timer, TrendingUp, UserRound, UsersRound, VenetianMask, Waypoints, X } from 'lucide-react'
 
 const hireModels = [

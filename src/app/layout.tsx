@@ -9,13 +9,17 @@ import type { Metadata, Viewport } from 'next'
 // six route-level stylesheets it used to load, in the same sequence). App.jsx
 // keeps its own './App.css' and './styles/service-detail.css' imports, which
 // ran immediately after this block in the original file graph.
+//
+// services-redesign.css, contact-page.css, and certifications.css moved to
+// the one page/component that actually uses each (ServicesPage.jsx,
+// ContactPage.jsx, CertificationsSection.jsx respectively) — loading them
+// globally meant every other route shipped ~93% unused CSS from this bundle
+// (a real Lighthouse "Reduce unused CSS" finding, ~242KB on the homepage).
+// certification-badges.css was dropped entirely: its only consumer,
+// CertificationBadges.jsx, is no longer imported anywhere in the app.
 import '../index.css'
 import '../styles/section-overrides.css'
-import '../styles/services-redesign.css'
-import '../styles/certifications.css'
 import '../styles/footer-redesign.css'
-import '../styles/contact-page.css'
-import '../styles/certification-badges.css'
 import '../styles/faq.css'
 import '../styles/icon-system.css'
 
@@ -74,6 +78,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             API field for http-equiv metas, so kept as a literal tag. */}
         <meta httpEquiv="content-language" content="en" />
 
+        {/* Preconnects moved to the very top of <head>, ahead of GTM/Clarity.
+            DNS+TCP+TLS to fonts.googleapis.com/gstatic.com now starts the
+            instant the browser parses <head>, instead of queueing behind the
+            two analytics script tags below -- shaves a full round trip off
+            when the (previously render-blocking, see below) font CSS can
+            actually finish. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
         {/* Google Tag Manager -- verbatim from index.html */}
         <script
           dangerouslySetInnerHTML={{
@@ -99,8 +112,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
         {/* End Microsoft Clarity */}
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* DM Sans (h1-h4 / section titles) and Inter (body) were originally
             loaded via a `@import url(...)` at the top of App.css. Next's
             Turbopack CSS pipeline silently drops that @import when it
@@ -109,15 +120,60 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             never actually downloaded and both families silently fell back
             to system fonts. Loading them the same way JetBrains Mono
             already does here -- a plain <link rel="stylesheet"> in <head> --
-            sidesteps the bundler entirely and is what actually works. */}
+            sidesteps the bundler entirely and is what actually works.
+
+            Lighthouse flagged these two as render-blocking (a real, measured
+            ~350ms hit): a stock `rel="stylesheet"` link blocks first paint
+            until it downloads. Fixed with the standard "print swap" trick --
+            `media="print"` makes the browser fetch it at background priority
+            without blocking render, then a same-document inline script flips
+            each to `media="all"` on its `load` event so it still applies
+            before/at first paint in practice.
+
+            An inline `onload="..."` HTML attribute would be the more common
+            way to write this trick, but it does NOT work here: this file is
+            a Server Component, so JSX can't hand a real event-handler
+            function to `onLoad`, and the lowercase `onload` workaround gets
+            silently stripped by React on render (confirmed empty in the
+            built output -- with it, these two stylesheets would have stayed
+            `media="print"` forever and the fonts would never have applied on
+            screen at all). The `addEventListener` script below is plain JS,
+            identical in spirit to the GTM/Clarity snippets above, and isn't
+            subject to that stripping. Exact same href/family names as
+            before, so there's no repeat of the font-mismatch risk a
+            next/font migration would carry. <noscript> ships the original
+            blocking link so the fonts still load correctly with JS
+            disabled. */}
         <link
+          id="gp-font-dm-sans-inter"
+          rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@100..900&display=swap"
-          rel="stylesheet"
+          media="print"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+          id="gp-font-jetbrains"
           rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+          media="print"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `['gp-font-dm-sans-inter','gp-font-jetbrains'].forEach(function(id){
+  var l = document.getElementById(id);
+  if (l) l.addEventListener('load', function () { l.media = 'all'; });
+});`,
+          }}
+        />
+        <noscript>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@100..900&display=swap"
+          />
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+          />
+        </noscript>
 
         <style
           dangerouslySetInnerHTML={{
