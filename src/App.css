@@ -181,7 +181,7 @@ button { font: inherit; }
   .brand-logo { height: 2.5rem; }
 }
 @media (max-width: 520px) {
-  .brand-logo { height: 2.15rem; max-width: 10.5rem; }
+  .brand-logo { height: 2.5rem; max-width: 10.5rem; }
 }
 
 /* Mobile drawer. It mounts on toggle, so it animates in from nothing rather
@@ -4314,7 +4314,7 @@ button { font: inherit; }
 }
 
 @media (max-width: 560px) {
-  .brand-logo { height: 1.7rem; max-width: 8.5rem; }
+  .brand-logo { height: 2.7rem; max-width: 8.5rem; }
   .hero { padding-top: 2.5rem; }
   .primary-pill, .secondary-pill, .platform-tabs button, .dashboard-cta, .widget-preview-card button, .admin-logout-btn { width: 100%; }
   .hero-note { text-align: left; align-items: flex-start; }
