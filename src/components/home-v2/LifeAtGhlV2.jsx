@@ -11,7 +11,7 @@ import './home-v2.css'
 const FILES = [
   'DSC00064 (1).jpg',
   'DSC00071 (1).jpg', 'DSC00072 (1).jpg', 'DSC00111 (1).jpg',
-  'DSC00353 (1).jpg', 'DSC00361 (1).jpg', 'DSC00382 (1).jpg',
+  'DSC00353 (1).jpg',
   'Image (2).jpg', 'Image (3).jpg', 'Image (4).jpg', 'Image (7).jpg',
   'Image (8).jpg', 'Image (9).jpg', 'Image (11).jpg', 'Image (12).jpg',
   'Image (13).jpg', 'Image (14).jpg', 'Image (17).jpg', 'Image (18).jpg',

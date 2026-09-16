@@ -11,7 +11,7 @@ const LIFE_AT_IMAGES = [
   'DSC00064 (1).jpg',
   'DSC00071 (1).jpg',
   'DSC00072 (1).jpg',
-  'DSC00082 (1).jpg',
+
   'DSC00110 (1).jpg',
   'DSC00111 (1).jpg',
   'DSC00353 (1).jpg',
