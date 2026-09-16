@@ -31,7 +31,6 @@ import ServiceSurveyForm from './ServiceSurveyForm'
 import { SERVICE_FORMS } from '../data/serviceForms'
 
 const SITE = 'https://ghlprime.com'
-const UPWORK = 'https://www.upwork.com/agencies/ghlprime/'
 
 const ICONS = {
   ArrowRight, CheckCircle2, Check, Code2, Terminal, LayoutDashboard, Plug, Users,
@@ -903,12 +902,10 @@ export default function ServiceDetailTemplate({ config }) {
                 <HeroBadges badges={config.hero.badges} />
                 <motion.a
                   className="primary-pill svc-hero-upwork"
-                  href={UPWORK}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/contact"
                   {...heroLineProps}
                 >
-                  Or hire via Upwork &rarr;
+                  Or contact us &rarr;
                 </motion.a>
               </motion.div>
               {/* The card swings in from its right edge. No pointer tilt on
@@ -1195,7 +1192,7 @@ export default function ServiceDetailTemplate({ config }) {
             <p>{config.cta.subtext}</p>
             <div className="svc-cta-actions">
               <Link href="/booking" className="primary-pill large">{config.cta.primaryLabel} <ArrowRight size={18} /></Link>
-              <a href={UPWORK} target="_blank" rel="noopener noreferrer" className="svc-cta-ghost">Hire via Upwork</a>
+              <Link href="/contact" className="svc-cta-ghost">Contact Us</Link>
             </div>
           </motion.div>
         </div>

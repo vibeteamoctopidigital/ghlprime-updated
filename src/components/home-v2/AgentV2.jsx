@@ -125,39 +125,7 @@ export default function AgentV2() {
   return (
     <section className="hv2 hv2-section is-tint" ref={ref}>
       <div className="hv2-inner hv2-agent">
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9 }}
-        >
-          <div className="hv2-head" style={{ marginBottom: 0 }}>
-            <span className="hv2-eyebrow">AI agents, deployed</span>
-            <h2>Your Best Closer <span className="hv2-hl">Never Sleeps.</span></h2>
-            <p>
-              We design, build, and deploy AI agents tailored to your agency&apos;s workflow, 
-              qualifying leads, handling inquiries, running AI call centers, and booking
-              meetings 24/7, without you touching a thing.
-            </p>
-          </div>
-
-          <div className="hv2-agent-points">
-            {POINTS.map((p) => {
-              const Icon = p.icon
-              return (
-                <div className="hv2-agent-point ic-hover" key={p.title}>
-                  <span className={`ic hv2-agent-point-icon ${p.tone}`}><Icon size={19} /></span>
-                  <div>
-                    <h3>{p.title}</h3>
-                    <p>{p.text}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </motion.div>
-
-        <motion.div
+         <motion.div
           initial={{ opacity: 0, y: 34, scale: 0.97 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -211,6 +179,39 @@ export default function AgentV2() {
         </Plane>
         </Stage>
         </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9 }}
+        >
+          <div className="hv2-head" style={{ marginBottom: 0 }}>
+            <span className="hv2-eyebrow">AI agents, deployed</span>
+            <h2>Your Best Closer <span className="hv2-hl">Never Sleeps.</span></h2>
+            <p>
+              We design, build, and deploy AI agents tailored to your agency&apos;s workflow, 
+              qualifying leads, handling inquiries, running AI call centers, and booking
+              meetings 24/7, without you touching a thing.
+            </p>
+          </div>
+
+          <div className="hv2-agent-points">
+            {POINTS.map((p) => {
+              const Icon = p.icon
+              return (
+                <div className="hv2-agent-point ic-hover" key={p.title}>
+                  <span className={`ic hv2-agent-point-icon ${p.tone}`}><Icon size={19} /></span>
+                  <div>
+                    <h3>{p.title}</h3>
+                    <p>{p.text}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.div>
+
+      
       </div>
     </section>
   )

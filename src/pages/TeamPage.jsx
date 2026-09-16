@@ -8,7 +8,7 @@ import SiteFooter from '../components/SiteFooter'
 import CertificationsSection from '../components/CertificationsSection'
 import { socialConfig } from '../components/socialConfig'
 import { fetchTeamMembers, fetchTeamPageExperts } from '../lib/teamApi'
-import ScrollProgress from '../components/motion3d/ScrollProgress'
+
 import '../components/pages-v2/pages-v2.css'
 import '../components/pages-v2/immersive.css'
 
@@ -126,7 +126,6 @@ export default function TeamPage() {
 
   return (
     <main className="about-page team-page pv2">
-      <ScrollProgress />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',

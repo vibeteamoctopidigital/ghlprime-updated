@@ -6,8 +6,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
 import './home-v2.css'
 
-const UPWORK = 'https://www.upwork.com/agencies/ghlprime/'
-
 const TRUST = ['GoHighLevel Certified Admins', 'White-labeled under your brand', '24/7 coverage']
 
 export default function HeroV2({ activePill, rotatingPills }) {
@@ -63,9 +61,9 @@ export default function HeroV2({ activePill, rotatingPills }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9, delay: 0.18 }}
           >
-            <a href={UPWORK} target="_blank" rel="noopener noreferrer" className="primary-pill large">
+            <Link href="/contact" className="primary-pill large">
               Hire Your Expert Team <ArrowRight size={17} />
-            </a>
+            </Link>
             <Link href="/services" className="secondary-pill large">
               See What We Do <ArrowRight size={16} />
             </Link>

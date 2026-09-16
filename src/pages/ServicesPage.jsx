@@ -190,7 +190,7 @@ export default function ServicesPage() {
               <span className="positive">Flexible hiring models</span>
             </div>
             <div className="services-redesign-hero-actions">
-              <a href="https://www.upwork.com/agencies/ghlprime/" target="_blank" rel="noopener noreferrer" className="primary-pill large">Hire Our Expert Team</a>
+              <Link href="/contact" className="primary-pill large">Hire Our Expert Team</Link>
               <Link href="/case-studies" className="secondary-pill">See Case Studies</Link>
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function ServicesPage() {
                 <ul>
                   {model.items.map((item) => <li key={item}>{item}</li>)}
                 </ul>
-                <a href="https://www.upwork.com/agencies/ghlprime/" target="_blank" rel="noopener noreferrer" className={model.featured ? 'primary-pill' : 'secondary-pill'}>Hire via Upwork</a>
+                <Link href="/contact" className={model.featured ? 'primary-pill' : 'secondary-pill'}>Contact Us</Link>
               </motion.article>
             ))}
           </div>
@@ -372,7 +372,7 @@ export default function ServicesPage() {
             <h2>Ready to Hire Your Expert Team?</h2>
             <p>Tell us what you need hourly, project, or full-time. We’ll match you with the right expert and get started fast.</p>
             <div className="final-cta-actions">
-              <a href="https://www.upwork.com/agencies/ghlprime/" target="_blank" rel="noopener noreferrer" className="primary-pill large">Hire via Upwork</a>
+              <Link href="/contact" className="primary-pill large">Contact Us</Link>
               <Link href="/case-studies" className="secondary-pill">View Case Studies</Link>
             </div>
           </div>

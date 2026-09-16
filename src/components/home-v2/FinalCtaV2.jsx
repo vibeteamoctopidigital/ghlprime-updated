@@ -5,8 +5,6 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import './home-v2.css'
 
-const UPWORK = 'https://www.upwork.com/agencies/ghlprime/'
-
 export default function FinalCtaV2() {
   return (
     <section className="hv2 hv2-section is-tint">
@@ -25,9 +23,9 @@ export default function FinalCtaV2() {
             support model. Same-day reply, no commitment.
           </p>
           <div className="hv2-cta-actions">
-            <a href={UPWORK} target="_blank" rel="noopener noreferrer" className="primary-pill large">
+            <Link href="/contact" className="primary-pill large">
               Hire Your Expert Team <ArrowRight size={17} />
-            </a>
+            </Link>
             <Link href="/booking" className="secondary-pill large">
               Book a free call <ArrowRight size={16} />
             </Link>
