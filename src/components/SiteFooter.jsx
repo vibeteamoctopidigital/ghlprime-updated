@@ -164,7 +164,7 @@ export default function SiteFooter() {
             <div style={{ lineHeight: 1.6 }}>Basundhara Residential Area, Dhaka, Bangladesh</div>
           </div>
           <div style={{ marginTop: '12px' }}>
-            <a href="https://wa.me/8801322939445" target="_blank" rel="noopener noreferrer" className="footer-hire-expert-link">Talk to Founder</a>
+            <a href="https://wa.me/15052075189" target="_blank" rel="noopener noreferrer" className="footer-hire-expert-link">Talk to Founder</a>
           </div>
         </div>
       </div>

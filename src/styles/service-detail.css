@@ -729,7 +729,34 @@
   border-top: 1px solid rgba(198,218,242,.85);
 }
 .megamenu-footer-logo { height: 2.5rem; width: auto; object-fit: contain; }
-.megamenu-footer-cta { min-height: 2.7rem; padding: 0 1.3rem; font-size: .9rem; gap: .4rem; }
+/* --primary-gradient runs bright blue (#1895ff) -> dark navy left to right,
+   scaled to each button's own width. Most .primary-pill labels are short
+   enough to sit past the brightest stretch, but "Get a free consultation"
+   is long enough that its first word lands right on the bright end, where
+   white text loses most of its contrast -- not a hover-state bug, the
+   button just never had enough contrast there. Scoped to this one button
+   rather than touching --primary-gradient or .primary-pill, both used
+   everywhere else on the site with no legibility issue. */
+.megamenu-footer-cta {
+  min-height: 2.7rem; padding: 0 1.3rem; font-size: .9rem; gap: .4rem;
+  text-shadow: 0 1px 3px rgba(2, 20, 40, .55);
+}
+/* The panel's links are still `.nav-links a`, so the nav's own
+   `.nav-links a:hover { color: var(--primary) }` (App.css) was repainting
+   this pill's white label brand blue on hover -- blue text on the blue
+   gradient, the one state where the label disappears completely.
+
+   Restated with the element plus an extra class so it wins on specificity
+   rather than on whichever of the two stylesheets happens to load last, and
+   given the same brightness-on-hover the header's other pills
+   (.primary-pill.nav-cta and friends) use, so it still reads as a button
+   reacting to the pointer instead of a dead one. */
+.nav-links a.megamenu-footer-cta { color: #fff; }
+.nav-links a.megamenu-footer-cta:hover {
+  color: #fff;
+  filter: brightness(1.12);
+  transition: transform .25s ease, filter .25s ease;
+}
 
 /* Mobile accordion category icons -- same real marks as the desktop panel. */
 /* Services accordion inside the mobile drawer. Left-aligned to match the

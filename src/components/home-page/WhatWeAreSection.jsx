@@ -267,7 +267,7 @@ export default function WhatWeAreSection() {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <WhatWeAreSlider />
+          {/* <WhatWeAreSlider /> */}
         </motion.div>
       </div>
     </section>

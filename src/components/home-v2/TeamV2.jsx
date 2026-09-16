@@ -7,22 +7,16 @@ import { fetchTeamMembers, fetchTeamPageExperts } from '../../lib/teamApi'
 import { socialConfig } from '../socialConfig'
 import './home-v2.css'
 
-// The home page shows a curated ten of the expert list; the Team page still
-// shows everyone. Matched on name rather than position so reordering in the
-// admin can never silently drop a different person than the one intended.
-const HOME_EXPERT_EXCLUDE = new Set(['Habibur Rahman'])
-const HOME_EXPERT_LIMIT = 10
-
-// Home-page portraits for the two founders: background-removed cut-outs
-// (980x1176, transparent) used here instead of whatever image_url the team
-// API carries. Keyed by name for the same reason as HOME_EXPERT_EXCLUDE
-// above. Home page only -- the Team page and admin records are unchanged.
-const HOME_LEADER_PORTRAIT = {
-  'jewel rana': '/jewel-rana-2.png',
-  'niyamul islam sajal': '/niyamul-islam-sajal.png',
-}
-const leaderPortrait = (leader) =>
-  HOME_LEADER_PORTRAIT[(leader.name || '').trim().toLowerCase()] || leader.image_url
+// This section is the Team page's data rendered on the home page: the same two
+// helpers (`fetchTeamMembers` / `fetchTeamPageExperts`), the same records, the
+// same `image_url` for every person.
+//
+// It used to carry home-only overrides -- leaders capped at three, experts
+// capped at ten with one name excluded, and a locally bundled cut-out portrait
+// swapped in for each founder by name. Those made the two pages disagree about
+// who is on the team and which photo belongs to whom (the Team page kept
+// showing whatever the API returned, the home page showed something else), so
+// the home page now renders the API records untouched.
 
 // Certification marks, carried over from the previous CertificationsSection.
 const CERTS = [
@@ -38,13 +32,9 @@ export default function TeamV2() {
   const [leaders, setLeaders] = useState([])
   const [experts, setExperts] = useState([])
 
-  useEffect(() => { fetchTeamMembers().then((list) => setLeaders((list || []).slice(0, 3))) }, [])
-  useEffect(() => {
-    fetchTeamPageExperts().then((list) => {
-      const curated = (list || []).filter((m) => !HOME_EXPERT_EXCLUDE.has((m.name || '').trim()))
-      setExperts(curated.slice(0, HOME_EXPERT_LIMIT))
-    })
-  }, [])
+  // Identical to the Team page's fetch, so both pages always agree.
+  useEffect(() => { fetchTeamMembers().then((list) => setLeaders(list || [])) }, [])
+  useEffect(() => { fetchTeamPageExperts().then((list) => setExperts(list || [])) }, [])
 
   return (
     <section className="hv2 hv2-section is-tint">
@@ -76,10 +66,10 @@ export default function TeamV2() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9, delay: i * 0.1 }}
               >
-                {leaderPortrait(leader) ? (
+                {leader.image_url ? (
                   <span className="hv2-team-stage">
                     <Image
-                      src={leaderPortrait(leader)}
+                      src={leader.image_url}
                       alt={leader.name}
                       fill
                       loading="lazy"
@@ -87,7 +77,7 @@ export default function TeamV2() {
                       // Local portraits go through the optimizer (the source
                       // PNGs are ~700KB each); an API-supplied URL on an
                       // arbitrary host is passed through as-is.
-                      unoptimized={!leaderPortrait(leader).startsWith('/')}
+                      unoptimized={!leader.image_url.startsWith('/')}
                     />
                   </span>
                 ) : null}

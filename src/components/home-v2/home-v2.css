@@ -134,12 +134,10 @@
 .hv2-trust-item { display: inline-flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--body); font-weight: 500; }
 .hv2-trust-item svg { color: #16a34a; flex: none; }
 
-/* ---------- Hero visual: one portrait dashboard screenshot ---------------- */
-/* ghl-launchpad.png is a tall portrait capture (656x881, ratio ~0.745) --
-   the box below used to assume a wide landscape screenshot (1600:764) with
-   object-fit: cover, which cropped a portrait image down to a sliver of
-   its actual content. object-fit: contain is a hard guarantee against
-   cropping regardless of the box's own shape.
+/* ---------- Hero visual: one dashboard screenshot, bled to the right edge -- */
+/* The screenshot runs from its own left edge all the way to the edge of the
+   window (ghlprime-dashboard.jpeg, 1400x1123) instead of sitting boxed inside
+   the 1240px container.
 
    Deliberately NO aspect-ratio on .hv2-hero-photo-row: next/image's `fill`
    renders as an absolutely-positioned <img>, which contributes no
@@ -150,11 +148,30 @@
    (taller) height and stretching the row to fit the image.
 
    No background/border/shadow "card" here on purpose -- just the raw
-   screenshot floating on the page, with its own rounded corners. */
+   screenshot floating on the page, with its own rounded corners (the right
+   ones fall outside the viewport once bled). */
 .hv2-hero-photo { display: flex; flex-direction: column; gap: .9rem; height: 100%; }
 .hv2-hero-photo-caption { align-self: flex-start; }
+/* The media column escapes .hv2-inner's right gutter by exactly that gutter's
+   width, so the screenshot bleeds off the right edge of the window while the
+   text column keeps its normal gutter on the left. The gutter formula mirrors
+   .hv2-inner's own `min(1240px, calc(100% - 2.5rem))`, centred: 1.25rem per
+   side below ~1265px, (100vw - 1240px) / 2 above it.
+
+   Only above the two-column breakpoint (1080px): once the grid stacks, a
+   one-sided bleed would leave the photo asymmetric against the centred text.
+   100vw includes the scrollbar, so the box overshoots the true edge by a few
+   pixels; `.hv2-hero`'s `overflow: hidden` clips that instead of letting it
+   become a horizontal scrollbar. */
+@media (min-width: 1081px) {
+  .hv2-hero-photo { margin-right: calc(-1 * max(1.25rem, (100vw - 1240px) / 2)); }
+}
 .hv2-hero-photo-row { position: relative; flex: 1; border-radius: 18px; overflow: hidden; }
-.hv2-hero-photo-row img { object-fit: contain; object-position: top center; }
+/* `cover` -- not `contain`: the box is wider than the 1400x1123 source, so
+   the photo scales to the full bleed width and is cropped at the *bottom*
+   (top-anchored), which is exactly how the reference UI frames it. `contain`
+   would letterbox it back down and leave the right edge empty. */
+.hv2-hero-photo-row img { object-fit: cover; object-position: left top; }
 
 /* ---------- Hero visual: a live automation pipeline ---------------------- */
 .hv2-console {
@@ -857,22 +874,27 @@
   box-shadow: 0 1px 3px rgba(15, 31, 53, .04), 0 20px 40px -30px rgba(15, 31, 53, .5);
   transition: transform .35s cubic-bezier(.22,1,.36,1), border-color .35s ease, box-shadow .35s ease;
 }
-/* Cut-out portrait (transparent background) standing on a soft gradient
-   stage, so it reads as a headshot rather than an avatar.
+/* Leader portrait on a soft gradient stage, so it reads as a headshot rather
+   than an avatar.
 
-   The stage takes the portraits' own 5:6 shape (980x1176) instead of a fixed
-   15rem height: the photo fills the full card width and grows with it, rather
-   than being shrunk into a short box with empty bands either side. `contain`
-   + bottom anchoring never crops -- shoulders sit on the stage floor and a
-   photo of any other shape just gains stage above it, never loses a head.
-   next/image `fill` supplies the absolute 100%/100% box these rules act on. */
+   The stage takes a 5:6 shape instead of a fixed 15rem height: the photo fills
+   the full card width and grows with it, rather than being shrunk into a short
+   box with empty bands either side. next/image `fill` supplies the absolute
+   100%/100% box these rules act on.
+
+   `cover` + top-biased object-position: the home page now shows the same
+   image_url the Team page does (no more locally bundled cut-out portraits),
+   so these are ordinary rectangular photos and need the same treatment as the
+   Team page's .iv-photo-frame img -- fill the frame, bias the crop to the
+   face. `contain` only made sense while the sources were transparent
+   cut-outs. */
 .hv2-team-stage {
   display: block; position: relative; aspect-ratio: 5 / 6; margin-bottom: 1.1rem;
   border-radius: 16px; overflow: hidden;
   background: linear-gradient(180deg, #f2f7fe, #ffffff 78%);
 }
 .hv2-team-stage img {
-  object-fit: contain; object-position: center bottom;
+  object-fit: cover; object-position: center 20%;
 }
 .hv2-team-body p {
   margin: .9rem 0 0; font-size: .9rem; line-height: 1.62; color: var(--body);
@@ -1151,6 +1173,15 @@
      grows the grid past the viewport instead of shrinking the pre down to
      its own overflow-x: auto scroller. */
   .hv2-hero-grid, .hv2-cap, .hv2-agent, .hv2-who, .hv2-vibe { grid-template-columns: minmax(0, 1fr); }
+  /* Once the hero grid stacks, the media column has no text column left to
+     stretch against, and its `height: 100%` resolves against an indefinite
+     (content-based) row -> auto. The screenshot itself is next/image `fill`,
+     i.e. an absolutely positioned <img> contributing no content height, so
+     the box measured 0 tall and the hero visual was simply invisible on
+     phones/tablets. `flex: none` (instead of the desktop `flex: 1`) makes the
+     row size from the screenshot's own 1400x1123 ratio rather than from flex
+     free space, so it shows underneath the copy. */
+  .hv2-hero-photo-row { flex: none; aspect-ratio: 1400 / 1123; }
   /* Below this width the list and the panel stack, so picking an item near
      the bottom of the list meant the panel changed off-screen, above where
      the reader was looking. The side panel is dropped in favour of each row

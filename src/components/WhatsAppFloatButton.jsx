@@ -3,10 +3,10 @@
 import { usePathname } from 'next/navigation'
 import './whatsapp-float.css'
 
-// Number lifted from the footer's own "Talk to Founder" link
-// (SiteFooter.jsx) rather than re-typed, so there's exactly one place this
-// number lives -- update that link and this button follows it.
-const WHATSAPP_NUMBER = '8801322939445'
+// The site's real US contact number (same one in the footer's phone link and
+// the Organization/LocalBusiness schema in App.jsx: +1-505-207-5189) -- kept
+// in sync with SiteFooter.jsx's "Talk to Founder" link, which points here too.
+const WHATSAPP_NUMBER = '15052075189'
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`
 
 export default function WhatsAppFloatButton() {
