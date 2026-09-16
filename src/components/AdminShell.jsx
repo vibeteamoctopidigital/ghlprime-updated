@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { BarChart3, Bot, Boxes, Images, FilePlus2, Image as ImageIcon, Layers3, Link2, LogOut, Newspaper, Plug, Users, Wrench } from 'lucide-react'
+import { BarChart3, Bot, Boxes, Calendar, Images, FilePlus2, Image as ImageIcon, Layers3, Link2, LogOut, Newspaper, Users, Wrench } from 'lucide-react'
 
 const navGroups = [
   {
@@ -12,8 +12,8 @@ const navGroups = [
       { label: 'Dashboard', icon: Layers3, to: '/admin/case-studies' },
       { label: 'Case Studies', icon: FilePlus2, to: '/admin/case-studies/manage' },
       { label: 'Blog', icon: Newspaper, to: '/admin/blog' },
-      { label: 'Auto Blog', icon: Bot, to: '/admin/blog-ai' },
-      { label: 'AI Connections', icon: Plug, to: '/admin/ai-connections' },
+      { label: 'Blog Writer', icon: Bot, to: '/admin/blog-writer' },
+      { label: 'Blog Schedules', icon: Calendar, to: '/admin/blog-schedules' },
       { label: 'Meeting Gallery', icon: ImageIcon, to: '/admin/meeting-gallery' },
       { label: 'Technology Logos', icon: Wrench, to: '/admin/technology-logos' },
       { label: 'Trusted Logos', icon: Link2, to: '/admin/trusted-logos' },

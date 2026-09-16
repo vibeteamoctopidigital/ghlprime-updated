@@ -1,0 +1,52 @@
+/* ==========================================================================
+   WhatsApp float button (.whatsapp-float)
+   --------------------------------------------------------------------------
+   Fixed, bottom-right, stacked ABOVE the GHL chat widget loaded in
+   App.jsx (LeadConnector's own bubble docks bottom-right at roughly a
+   20px/60px offset+size by default) -- 5.5rem of bottom clearance keeps a
+   real gap between the two. If the live widget renders at a different
+   size once you can see it, this is the one number to nudge.
+
+   Solid WhatsApp brand green rather than the site's blue palette,
+   deliberately: this icon's whole job is to be instantly recognizable at a
+   glance, which the brand color does and an on-theme color would undercut.
+   ========================================================================== */
+
+.whatsapp-float {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 5.5rem;
+  z-index: 44;
+  display: grid;
+  place-items: center;
+  width: 3.35rem;
+  height: 3.35rem;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 18px 36px -16px rgba(2, 38, 70, .55), inset 0 1px 0 rgba(255, 255, 255, .35);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s ease;
+}
+.whatsapp-float:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 24px 44px -18px rgba(2, 38, 70, .65), inset 0 1px 0 rgba(255, 255, 255, .4);
+}
+.whatsapp-float:active { transform: translateY(-1px) scale(.98); }
+.whatsapp-float:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.whatsapp-float-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+@media (max-width: 640px) {
+  .whatsapp-float {
+    right: 1rem;
+    bottom: 5rem;
+    width: 3rem;
+    height: 3rem;
+  }
+  .whatsapp-float-icon { width: 1.5rem; height: 1.5rem; }
+}

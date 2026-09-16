@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import SiteFooter from '../components/SiteFooter'
+import BlogCtaBanner from '../components/BlogCtaBanner'
 import { fetchBlogPostBySlug, fetchRelatedPosts } from '../lib/blogApi'
+import { splitContentForCta } from '../lib/blogContentSplit'
 import contentSnapshot from '../data/contentSnapshot.json'
 
 const SEEDED_POSTS = contentSnapshot.blogPosts || []
@@ -182,7 +184,40 @@ export default function BlogPostPage() {
           <span className="blog-card-badge">{post.category}</span>
         </div>
 
-        <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+        {/* A CTA banner and a sources fold only ever appear for a post that
+            actually carries cta_variant/sources -- both are new, optional
+            Blog Writer columns every pre-existing post has as null, so this
+            renders exactly as it always did for every post written before
+            this feature existed. */}
+        {post.cta_variant ? (
+          (() => {
+            const { before, after } = splitContentForCta(post.content)
+            return (
+              <>
+                <div className="blog-content" dangerouslySetInnerHTML={{ __html: before }} />
+                <BlogCtaBanner variant={post.cta_variant} />
+                {after ? <div className="blog-content" dangerouslySetInnerHTML={{ __html: after }} /> : null}
+              </>
+            )
+          })()
+        ) : (
+          <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+        )}
+
+        {Array.isArray(post.sources) && post.sources.length ? (
+          <section className="blog-sources-fold" aria-label="Sources">
+            <details>
+              <summary>Sources ({post.sources.length})</summary>
+              <ul>
+                {post.sources.map((source) => (
+                  <li key={source.url}>
+                    <a href={source.url} target="_blank" rel="noopener noreferrer">{source.name || source.url}</a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </section>
+        ) : null}
 
         {relatedPosts.length ? (
           <section className="blog-related" aria-labelledby="blog-related-heading">

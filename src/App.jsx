@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, ChevronDown, ChevronRight, Mail, Menu, X } from 'lucide-react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import BackToTop from './components/BackToTop'
+import WhatsAppFloatButton from './components/WhatsAppFloatButton'
 import './App.css'
 import './styles/service-detail.css'
 import { SERVICE_MENU } from './data/serviceCatalog'
@@ -507,6 +508,7 @@ export default function App({ children }) {
       <SiteHeader />
       <ScrollToTop />
       <BackToTop />
+      <WhatsAppFloatButton />
       <main>{children}</main>
       <SpeedInsights />
     </div>
