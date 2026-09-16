@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { BarChart3, Bot, Boxes, Calendar, Images, FilePlus2, Image as ImageIcon, Layers3, Link2, LogOut, Newspaper, Users, Wrench } from 'lucide-react'
+import { BarChart3, Bot, Boxes, Calendar, Images, FilePlus2, Image as ImageIcon, KeyRound, Layers3, Link2, LogOut, Newspaper, Users, Wrench } from 'lucide-react'
 
 const navGroups = [
   {
@@ -14,6 +14,7 @@ const navGroups = [
       { label: 'Blog', icon: Newspaper, to: '/admin/blog' },
       { label: 'Blog Writer', icon: Bot, to: '/admin/blog-writer' },
       { label: 'Blog Schedules', icon: Calendar, to: '/admin/blog-schedules' },
+      { label: 'Claude Account', icon: KeyRound, to: '/admin/claude-auth' },
       { label: 'Meeting Gallery', icon: ImageIcon, to: '/admin/meeting-gallery' },
       { label: 'Technology Logos', icon: Wrench, to: '/admin/technology-logos' },
       { label: 'Trusted Logos', icon: Link2, to: '/admin/trusted-logos' },
