@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 
 // This file is the Next.js equivalent of the original index.html + src/main.jsx
 // pairing. It is written from those two files, not rebuilt from a template —
@@ -87,8 +88,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
-        {/* Google Tag Manager -- verbatim from index.html */}
-        <script
+        {/* Google Tag Manager -- verbatim from index.html. Raw inline <script>
+            tags inside a React component are never executed on the client (and
+            in React 19 dev builds surface a console error), so analytics here
+            go through next/script: with the default afterInteractive strategy
+            the component renders null and the runtime injects the code
+            imperatively after hydration, which also keeps GTM out of the way
+            of the LCP paint. */}
+        <Script
+          id="gtm-init"
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -99,9 +107,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
         {/* End Google Tag Manager */}
 
-        {/* Microsoft Clarity -- verbatim from index.html */}
-        <script
-          type="text/javascript"
+        {/* Microsoft Clarity -- verbatim from index.html, same reasoning as
+            the GTM snippet above. */}
+        <Script
+          id="ms-clarity-init"
           dangerouslySetInnerHTML={{
             __html: `(function(c,l,a,r,i,t,y){
   c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -156,11 +165,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
           media="print"
         />
-        <script
+        {/* The media="print" links above render server-side inside <head>,
+            but this flip script now runs post-hydration via next/script, by
+            which time those <link> elements always exist in the DOM. The
+            readyState check covers the edge where the sheets finished
+            downloading before hydration: a cached stylesheet's load event can
+            fire before React attaches the listener, which would otherwise
+            leave the fonts stuck at media="print" (invisible) forever. */}
+        <Script
+          id="gp-font-media-flip"
           dangerouslySetInnerHTML={{
             __html: `['gp-font-dm-sans-inter','gp-font-jetbrains'].forEach(function(id){
   var l = document.getElementById(id);
-  if (l) l.addEventListener('load', function () { l.media = 'all'; });
+  if (!l) return;
+  if (l.sheet) { l.media = 'all'; return; }
+  l.addEventListener('load', function () { l.media = 'all'; });
 });`,
           }}
         />

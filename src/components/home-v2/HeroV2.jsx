@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
 import './home-v2.css'
@@ -78,23 +77,6 @@ export default function HeroV2({ activePill, rotatingPills }) {
             {TRUST.map((t) => (
               <span className="hv2-trust-item" key={t}><Check size={15} /> {t}</span>
             ))}
-          </motion.div>
-        </div>
-
-        <div className="hv2-hero-photo">
-          {/* <span className="hv2-eyebrow hv2-hero-photo-caption">Client Workspace We Build &amp; Manage</span> */}
-          <motion.div className="hv2-hero-photo-row">
-            <Image
-              src="/ghlprime-dashboard.jpeg"
-              alt="A GoHighLevel dashboard and CRM built and managed by the GHL Prime team"
-              fill
-              preload
-              fetchPriority="high"
-              // The media column bleeds to the right edge of the window (see
-              // .hv2-hero-photo in home-v2.css), so it is wider than the grid
-              // track alone: ~48vw once the container maxes out at 1240px.
-              sizes="(max-width: 1080px) 92vw, 48vw"
-            />
           </motion.div>
         </div>
       </div>

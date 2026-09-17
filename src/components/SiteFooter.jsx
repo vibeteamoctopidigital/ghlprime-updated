@@ -38,7 +38,7 @@ const footerServices = [
   { label: 'All Services', to: '/services' },
 ]
 
-const givesocialLinks = [
+const socialLinks = [
   {
     label: 'Facebook',
     href: 'https://www.facebook.com/profile.php?id=61573474861100',
