@@ -1,24 +1,43 @@
 # GHL Prime
-> GHL Prime is a dedicated GoHighLevel expert team providing CRM setup, automation workflows, AI agents, vibe coding, and 24/7 white-label support for marketing agencies and SaaS founders. US-based, GHL-certified, fully white-labeled.
+> GHL Prime is a dedicated GoHighLevel expert team providing CRM setup, automation workflows, AI agents, vibe coding, and 24/7 white-label support for marketing agencies, SaaS founders, and local businesses. US-based, GHL-certified, fully white-labeled. Clients can hire the full team on retainer or hire one individual GoHighLevel specialist for a specific project.
 
 ## Company
 - [GHL Prime LLC](https://ghlprime.com): Legal name, founded 2024, HQ at 4801 Lang Ave NE, Suite 110, Albuquerque, NM 87109, USA. Email info@ghlprime.com, phone +1-505-207-5189
 - [Octopi Digital](https://octopi-digital.com): Parent company
 
 ## What GHL Prime does
-GHL Prime acts as the dedicated technical backend team for marketing agencies and SaaS founders who use GoHighLevel. Services include:
-- GoHighLevel CRM setup and sub-account configuration
-- Marketing automation workflow builds
-- AI agent and voice receptionist deployment
-- White-label SaaS Mode configuration and launch
-- Vibe coding (AI-assisted custom development)
-- 24/7 white-label client support
-- API integrations and custom dashboards
-- Team training and SOP documentation
+GHL Prime acts as the dedicated technical backend team for marketing agencies, SaaS founders, and local businesses that run on GoHighLevel. Services include:
+- GoHighLevel CRM setup, sub-account configuration, and account migration from other CRMs
+- Marketing automation workflow builds: speed-to-lead follow-up, appointment reminders, pipeline automation, review requests, database reactivation
+- AI agent and voice receptionist deployment for lead qualification and 24/7 call handling
+- White-label SaaS Mode configuration, Stripe rebilling, and SaaS launch for agencies
+- Vibe coding: AI-assisted custom development for tools GoHighLevel cannot build natively
+- Funnel design and landing page builds inside GoHighLevel
+- 24/7 white-label client support and helpdesk coverage, invisible to the agency's own clients
+- API integrations, webhooks, and custom dashboards
+- Figma to code conversion and web/mobile app development
+- Team training, SOP documentation, and ongoing GHL platform updates
+
+## Hire an Individual
+- [Hire an Individual](https://ghlprime.com/hire-an-individual): Hire one dedicated, GHL-certified GoHighLevel specialist matched to a single need, instead of a full agency retainer. A 3-step request form lets a client pick the services they need (GHL setup, workflow automation, funnel design, AI agent building, custom SaaS development, and more), select a monthly budget range, and set a timeline. Every specialist is GHL-certified and vetted, and deliverables still pass through GHL Prime's two-layer leadership review even on a single-specialist engagement. This page targets searches such as "hire a GoHighLevel specialist," "hire a GoHighLevel expert," "hire a GoHighLevel automation specialist," "hire a GoHighLevel developer," "hire a GoHighLevel freelancer," "GoHighLevel virtual assistant for hire," and "hire an AI agent builder."
+- Specialists can also be requested by name directly from their profile card on the Hire an Individual page, each showing their role and core skills.
+
+## Services (dedicated pages)
+- [All Services](https://ghlprime.com/services): Full service catalog and overview
+- [GHL Setup & Configuration](https://ghlprime.com/services/ghl-setup): Sub-accounts, pipelines, calendars, A2P/Twilio registration, and full GoHighLevel account setup
+- [Workflow Automation](https://ghlprime.com/services/automation): Speed-to-lead, appointment reminders, pipeline automation, review requests, database reactivation
+- [SaaS CRM Launch](https://ghlprime.com/services/saas-crm): Stripe rebilling, plan tiers, and white-label SaaS Mode launch for agencies reselling GoHighLevel
+- [White-Label Support](https://ghlprime.com/services/white-label-support): 24/7 expert client support delivered under the agency's own brand
+- [Vibe Coding & Custom Dev](https://ghlprime.com/services/vibe-coding): AI-assisted custom development and integrations beyond native GoHighLevel features
+- [AI Agent Builder](https://ghlprime.com/services/ai-agent-builder): Lead-qualifying chatbots, voice receptionists, and AI call center agents
+- [Custom SaaS Development](https://ghlprime.com/services/custom-saas-development): Client portals and dashboards built with Claude Code and Supabase
+- [Figma to Code](https://ghlprime.com/services/figma-to-code): Pixel-perfect design-to-production-code builds
+- [Web & Mobile App Development](https://ghlprime.com/services/app-development): iOS, Android, and web apps from MVP to production
+- [SaaS Customer Support](https://ghlprime.com/services/saas-customer-support): White-labeled ticket handling and client onboarding, 24/7 coverage
 
 ## Leadership
-- [Jewel Rana](https://www.linkedin.com/in/thejewelrana/): CEO & Co-Founder
-- [Niyamul Islam Sajal](https://www.linkedin.com/in/niyamulislam/): COO & Co-Founder
+- [Jewel Rana](https://www.linkedin.com/in/thejewelrana/): CEO & Co-Founder, business coach and agency growth strategist
+- [Niyamul Islam Sajal](https://www.linkedin.com/in/niyamulislam/): COO & Co-Founder, senior automation engineer specializing in AI systems and CRM infrastructure
 
 ## Certifications
 GoHighLevel Certified Admin, A2P Compliance, HIPAA Compliance, AI Employee, SaaS Mode, Course Creator, Paid Ads, Social Media Manager, Automated Swag Store, Quick Wins, WhatsApp Integration.
@@ -26,18 +45,26 @@ GoHighLevel Certified Admin, A2P Compliance, HIPAA Compliance, AI Employee, SaaS
 ## Key pages
 - [Homepage](https://ghlprime.com)
 - [Services](https://ghlprime.com/services)
+- [Hire an Individual](https://ghlprime.com/hire-an-individual)
 - [Case Studies](https://ghlprime.com/case-studies)
 - [About](https://ghlprime.com/about)
 - [Team](https://ghlprime.com/team)
+- [Gallery](https://ghlprime.com/gallery)
 - [Blog](https://ghlprime.com/blog)
 - [FAQ](https://ghlprime.com/faq)
 - [Contact](https://ghlprime.com/contact)
 - [Booking](https://ghlprime.com/booking)
+- [Privacy Policy](https://ghlprime.com/privacy-policy)
+- [Terms & Conditions](https://ghlprime.com/terms)
 
 ## Blog topics
-GoHighLevel setup, automation workflows, AI agents, voice AI, white-label CRM, A2P 10DLC compliance, Twilio SMS, Zapier integrations, n8n automation, SimpleTalk AI, custom GHL development, vibe coding, agency growth strategy.
+GoHighLevel setup guides, workflow automation tutorials, AI agents and voice AI for GoHighLevel, white-label CRM strategy, A2P 10DLC compliance, Twilio SMS setup, Zapier and n8n automation, SimpleTalk AI, custom GoHighLevel development, vibe coding, agency growth strategy, hiring a GoHighLevel specialist versus building an in-house team, GoHighLevel SaaS Mode pricing and launch.
+
+## Who GHL Prime serves
+Marketing agencies reselling GoHighLevel to their own clients, SaaS founders launching on GoHighLevel's SaaS Mode, local service businesses (home services, med spas, contractors) that need automation and AI agents, coaches and course creators, and freelancers or consultants who need to hire one GoHighLevel specialist for a single project rather than a full agency engagement.
 
 ## Social profiles
 - [LinkedIn](https://www.linkedin.com/company/ghl-prime-llc)
 - [Facebook](https://www.facebook.com/profile.php?id=61573474861100)
+- [Instagram](https://www.instagram.com/ghlprimellc/)
 - [Upwork](https://www.upwork.com/agencies/ghlprime/)

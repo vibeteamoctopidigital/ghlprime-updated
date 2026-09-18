@@ -13,7 +13,9 @@ import '../components/pages-v2/pages-v2.css'
 import '../components/pages-v2/immersive.css'
 import '../styles/hire-individual.css'
 
-const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/j53xn6YJHwIdPImV00rn/webhook-trigger/788ab1c6-9220-4731-ba35-9919821c2fe2'
+// Dedicated GHL workflow for this page's leads -- separate from /contact's
+// webhook so these route into their own pipeline in GoHighLevel.
+const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/tc4QYWapkvuynWNE4abr/webhook-trigger/c6234973-e5db-4010-bdab-8dee59f04f6a'
 
 const STEPS = [
   { id: 1, title: 'Your details' },
