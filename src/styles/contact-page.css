@@ -7,28 +7,6 @@
   gap: 2rem;
   align-items: start;
 }
-.contact-page-grid-embed {
-  align-items: stretch;
-}
-.contact-embed-shell {
-  min-height: 0;
-}
-.contact-embed-card {
-  padding: 0 !important;
-  height: auto;
-  min-height: 0;
-  overflow: hidden;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  border-radius: 0 !important;
-}
-.contact-embed-card iframe {
-  height: 720px !important;
-  min-height: 720px;
-  background: transparent;
-}
 .contact-page-copy h1 {
   margin: 0;
   font-size: clamp(2.4rem, 5vw, 4.6rem);
@@ -120,10 +98,6 @@
   }
   .contact-form-full {
     grid-column: auto;
-  }
-  .contact-embed-card iframe {
-    height: 680px !important;
-    min-height: 680px;
   }
 }
 

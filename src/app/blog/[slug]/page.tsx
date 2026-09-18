@@ -52,7 +52,7 @@ export async function generateMetadata({
   const canonical = `https://ghlprime.com/blog/${slug}`
   const metaTitle = post.seo_title || post.title
   const metaDescription = post.seo_description || post.excerpt
-  const shareImage = post.cover_image || 'https://ghlprime.com/og-blog.png'
+  const shareImage = post.cover_image || 'https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'
   const keywords =
     post.seo_keywords || [post.category, 'GoHighLevel', 'GHL Prime'].filter(Boolean).join(', ')
 

@@ -117,7 +117,7 @@ export default function BlogPostPage() {
   const metaDescription = post.seo_description || post.excerpt
   // Never emit an empty og:image. Use the post's own cover when it has one,
   // otherwise fall back to the blog hub card.
-  const shareImage = post.cover_image || 'https://ghlprime.com/og-blog.png'
+  const shareImage = post.cover_image || 'https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'
 
   return (
     <main className="section section-white blog-post-page">

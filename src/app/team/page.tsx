@@ -15,11 +15,11 @@ export const metadata: Metadata = {
     description:
       "Our GoHighLevel-certified team averages 4+ years of GHL experience. Meet the founders and specialists delivering backend execution under your agency's brand.",
     url: 'https://ghlprime.com/team',
-    images: ['https://ghlprime.com/og-team.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
     type: 'website',
   },
   twitter: {
-    images: ['https://ghlprime.com/og-team.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
   },
   other: {
     'last-modified': '2026-05-24',

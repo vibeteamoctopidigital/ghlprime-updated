@@ -63,8 +63,8 @@ export default function HeroV2({ activePill, rotatingPills }) {
             <Link href="/contact" className="primary-pill large">
               Hire Your Expert Team <ArrowRight size={17} />
             </Link>
-            <Link href="/services" className="secondary-pill large">
-              See What We Do <ArrowRight size={16} />
+            <Link href="/hire-an-individual" className="secondary-pill large">
+              Hire an Individual <ArrowRight size={16} />
             </Link>
           </motion.div>
 

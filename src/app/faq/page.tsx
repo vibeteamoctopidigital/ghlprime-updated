@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     description:
       'Answers to the most common questions agencies and SaaS founders ask before hiring GHL Prime pricing, process, white-label, AI agents, SaaS Mode, and more.',
     url: 'https://ghlprime.com/faq',
-    images: ['https://ghlprime.com/og-faq.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
     type: 'website',
   },
   twitter: {
     title: 'GoHighLevel Expert FAQ GHL Prime Answers Your Questions',
     description:
       'Answers to the most common questions agencies and SaaS founders ask before hiring GHL Prime pricing, process, white-label, AI agents, SaaS Mode, and more.',
-    images: ['https://ghlprime.com/og-faq.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
   },
   other: {
     'last-modified': '2026-05-31',

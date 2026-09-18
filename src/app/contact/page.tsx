@@ -14,14 +14,14 @@ export const metadata: Metadata = {
     description:
       'Contact GHL Prime to hire a dedicated GoHighLevel expert for CRM setup, automation, AI agents, and white-label support. Based in Albuquerque, NM.',
     url: 'https://ghlprime.com/contact',
-    images: ['https://ghlprime.com/og-contact.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
     type: 'website',
   },
   twitter: {
     title: 'Contact GHL Prime Hire a GoHighLevel Expert Team',
     description:
       'Contact GHL Prime to hire a dedicated GoHighLevel expert for CRM setup, automation, AI agents, and white-label support. Based in Albuquerque, NM.',
-    images: ['https://ghlprime.com/og-contact.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
   },
   other: {
     'last-modified': '2026-05-24',

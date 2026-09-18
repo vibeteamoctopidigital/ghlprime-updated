@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     description:
       'Trained GoHighLevel specialists for CRM setup, automation workflows, AI agents, vibe coding, and 24/7 white-label client support. Hire the way your agency needs.',
     url: 'https://ghlprime.com/services',
-    images: ['https://ghlprime.com/og-services.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
     type: 'website',
   },
   twitter: {
     title: 'Hire GoHighLevel Experts Hourly, Project or Full-Time | GHL Prime',
     description:
       'Trained GoHighLevel specialists for CRM setup, automation workflows, AI agents, vibe coding, and 24/7 white-label client support. Hire the way your agency needs.',
-    images: ['https://ghlprime.com/og-services.png'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
   },
   other: {
     'last-modified': '2026-05-24',

@@ -47,9 +47,13 @@ export const metadata: Metadata = {
     siteName: 'GHL Prime', // <meta property="og:site_name" content="GHL Prime" />
     locale: 'en_US', // <meta property="og:locale" content="en_US" />
     type: 'website',
+    // Site-wide fallback social preview image -- used whenever a page's own
+    // metadata export doesn't set its own `openGraph.images`/`twitter.images`.
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
   },
   twitter: {
     card: 'summary_large_image', // <meta name="twitter:card" content="summary_large_image" />
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
   },
   icons: {
     // <link rel="icon" href="/favicon.ico" sizes="32x32" />

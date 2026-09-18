@@ -17,6 +17,7 @@ const ASK_AI_ASSISTANTS = [
 const footerCompany = [
   { label: 'About', to: '/about' },
   { label: 'Team', to: '/team' },
+  { label: 'Hire an Individual', to: '/hire-an-individual' },
   { label: 'Case Studies', to: '/case-studies' },
   { label: 'Blog', to: '/blog' },
   { label: 'FAQ', to: '/faq' },

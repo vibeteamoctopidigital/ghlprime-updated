@@ -52,7 +52,7 @@ export async function generateMetadata({
     }
   }
 
-  const image = meta.image || 'https://ghlprime.com/og-case-studies.png'
+  const image = meta.image || 'https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'
   const keywords = `${study?.category || 'GoHighLevel'} case study, GoHighLevel automation, GHL Prime case study`
 
   return {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
 import SiteFooter from '../components/SiteFooter'
 import '../styles/contact-page.css'
@@ -302,7 +303,7 @@ export default function ContactPage() {
           </div>
 
           <div className="contact-form-shell contact-survey-shell">
-            <div className="contact-survey-card">
+            <motion.div className="contact-survey-card" layout transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
               <ol className="contact-survey-progress">
                 {STEPS.map((s) => {
                   const state = s.id === step ? 'is-current' : s.id < step ? 'is-done' : ''
@@ -414,7 +415,7 @@ export default function ContactPage() {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>

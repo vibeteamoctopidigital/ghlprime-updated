@@ -16,8 +16,7 @@ type ServiceConfig = {
 
 export function buildServiceMetadata(config: ServiceConfig): Metadata {
   const url = `${SITE}${config.slug}`
-  const serviceSlug = config.slug.replace('/services/', '')
-  const ogImage = config.seo.ogImage || `${SITE}/og-services-${serviceSlug}.png`
+  const ogImage = config.seo.ogImage || `${SITE}/og-ghlprime-gohighlevel-expert-agency.jpeg`
   const keywords = `${config.breadcrumbName}, GoHighLevel services, GoHighLevel expert team, GHL Prime`
 
   return {
