@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, CheckCircle2, X } from 'lucide-react'
 import SiteFooter from '../components/SiteFooter'
 import { socialConfig } from '../components/socialConfig'
-import { fetchTeamMembers, fetchTeamPageExperts } from '../lib/teamApi'
+import { fetchTeamPageExperts } from '../lib/teamApi'
 
 import '../components/pages-v2/pages-v2.css'
 import '../components/pages-v2/immersive.css'
@@ -46,39 +46,66 @@ const BUDGET_OPTIONS = [
 
 const TIMELINE_OPTIONS = ['As soon as possible', 'Within the next month', 'Just exploring for now']
 
-// The DB only stores a name/role/title for team members and experts -- no
-// skills column (verified against the backend's TeamMember model and the
-// team.routes.ts expert schema). Real leaders get real, hand-written skill
-// tags below; anyone else (experts pulled live from the admin panel) gets
-// tags derived from their title so the section still works when new people
-// are added there without a code change.
-const SKILL_MAP = {
-  'Jewel Rana': [
-    { name: 'GHL Strategy', level: 96 },
-    { name: 'Agency Growth', level: 93 },
-    { name: 'Client Onboarding', level: 90 },
-    { name: 'Business Coaching', level: 88 },
-  ],
-  'Niyamul Islam Sajal': [
-    { name: 'Workflow Automation', level: 97 },
-    { name: 'AI Agents', level: 94 },
-    { name: 'API Integrations', level: 91 },
-    { name: 'CRM Architecture', level: 89 },
-  ],
-}
+// The founders already have their own dedicated spotlight on /team -- this
+// page is for individually-hireable specialists, so they're excluded here
+// even if they also happen to exist as a "Meet the Experts" row.
+const EXCLUDED_NAMES = new Set(['Jewel Rana', 'Niyamul Islam Sajal'])
 
-// Levels for anyone without a hand-written entry above are derived, not
-// measured -- the DB has no skills column (verified against the backend's
-// TeamMember model), so this keeps the section working for experts added
-// later in the admin panel without a code change, at a slight, deliberately
-// declining level per tag so the first (most prominent) skill in their
-// title still reads as their strongest.
+// Experts (team_page_members) only store name/title/image_url -- no skills
+// column (verified against the backend's team.routes.ts expert schema).
+// Skills are derived from the job title/role: split it into its own phrases
+// first (those become the person's top, most prominent skills), then top up
+// with related skills pulled from the keyword dictionary below, matched
+// against words in that same title, until every card shows at least 4 --
+// never just the one or two words the raw title happened to contain.
+const SKILL_KEYWORDS = [
+  { match: /automat/i, skills: ['Workflow Automation', 'Trigger & Webhook Logic', 'Process Optimization'] },
+  { match: /\bai\b|artificial intelligence/i, skills: ['AI Agent Design', 'Prompt Engineering', 'Conversational Flows'] },
+  { match: /develop|engineer|vibe cod/i, skills: ['Custom Development', 'API Integrations', 'Code Quality'] },
+  { match: /design/i, skills: ['UI/UX Design', 'Landing Page Design', 'Visual Branding'] },
+  { match: /support/i, skills: ['Client Support', 'Ticket Resolution', 'Client Onboarding'] },
+  { match: /crm/i, skills: ['CRM Configuration', 'Pipeline Setup'] },
+  { match: /ghl|gohighlevel|go high level/i, skills: ['GoHighLevel Setup', 'Sub-Account Management'] },
+  { match: /market/i, skills: ['Campaign Strategy', 'Lead Generation'] },
+  { match: /sales/i, skills: ['Sales Enablement', 'Deal Pipeline Management'] },
+  { match: /funnel/i, skills: ['Funnel Design', 'Conversion Optimization'] },
+  { match: /project|manag/i, skills: ['Project Management', 'Client Communication'] },
+  { match: /qa|quality/i, skills: ['Quality Assurance', 'Testing & QA'] },
+  { match: /data|analy/i, skills: ['Data Analysis', 'Reporting Dashboards'] },
+  { match: /content|copy|writ/i, skills: ['Content Strategy', 'Copywriting'] },
+  { match: /video|edit/i, skills: ['Video Editing', 'Motion Graphics'] },
+  { match: /saas/i, skills: ['SaaS Onboarding', 'Account Configuration'] },
+]
+
+// Always applicable, used to fill any card that still needs more skills
+// once the title itself and the keyword matches above are exhausted.
+const GENERAL_SKILLS = ['GoHighLevel Platform', 'Client Communication', 'Process Documentation', 'Team Collaboration']
+
 function skillsFor(person) {
-  if (SKILL_MAP[person.name]) return SKILL_MAP[person.name]
   const source = person.title || person.role || ''
-  const parts = source.split(/\s*(?:&|,|\/| and )\s*/i).map((p) => p.trim()).filter(Boolean)
-  const names = parts.length ? parts.slice(0, 4) : (source ? [source] : [])
-  return names.map((name, i) => ({ name, level: Math.max(78, 92 - i * 5) }))
+  const seen = new Set()
+  const names = []
+
+  const addName = (name) => {
+    const key = name.trim().toLowerCase()
+    if (!name.trim() || seen.has(key)) return
+    seen.add(key)
+    names.push(name.trim())
+  }
+
+  source.split(/\s*(?:&|,|\/| and )\s*/i).forEach(addName)
+
+  for (const { match, skills } of SKILL_KEYWORDS) {
+    if (names.length >= 4) break
+    if (match.test(source)) skills.forEach(addName)
+  }
+
+  for (const skill of GENERAL_SKILLS) {
+    if (names.length >= 4) break
+    addName(skill)
+  }
+
+  return names.slice(0, 4).map((name, i) => ({ name, level: Math.max(78, 92 - i * 5) }))
 }
 
 const SPRING = { type: 'spring', stiffness: 120, damping: 20, mass: 0.9 }
@@ -203,7 +230,6 @@ function SpecialistCard({ person, index, onRequest }) {
 
 export default function HireIndividualPage() {
   const router = useRouter()
-  const [leaders, setLeaders] = useState([])
   const [experts, setExperts] = useState([])
   const [step, setStep] = useState(1)
   const [submitting, setSubmitting] = useState(false)
@@ -222,7 +248,6 @@ export default function HireIndividualPage() {
   })
 
   useEffect(() => {
-    fetchTeamMembers().then(setLeaders)
     fetchTeamPageExperts().then(setExperts)
   }, [])
 
@@ -294,7 +319,7 @@ export default function HireIndividualPage() {
     if (step < 3 && isStepValid()) next()
   }
 
-  const people = [...leaders, ...experts]
+  const people = experts.filter((person) => !EXCLUDED_NAMES.has(person.name))
 
   return (
     <main className="hire-page pv2">

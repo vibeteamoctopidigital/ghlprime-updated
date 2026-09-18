@@ -213,14 +213,6 @@
   transform: translateY(-2px);
 }
 
-.hire-specialist-card::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  background: linear-gradient(180deg, #2b77e7, #6fc7ff);
-}
-
 /* -- media column (photo + years disc + socials) -------------------------- */
 .hire-specialist-media {
   display: flex;
