@@ -14,11 +14,11 @@ export const metadata: Metadata = {
     description:
       'Tell us what your agency needs. We match you with a GHL-certified specialist within 24 hours. Hourly, project, or full-time no contract, no setup fee.',
     url: 'https://ghlprime.com/booking',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     type: 'website',
   },
   twitter: {
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   other: {
     'last-modified': '2026-05-24',

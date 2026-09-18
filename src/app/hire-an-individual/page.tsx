@@ -15,11 +15,11 @@ export const metadata: Metadata = {
     description:
       'Hire one dedicated, GHL-certified specialist matched to your exact need automation, funnel design, AI agents, or custom development.',
     url: 'https://ghlprime.com/hire-an-individual',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     type: 'website',
   },
   twitter: {
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   other: {
     'last-modified': '2026-09-18',

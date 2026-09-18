@@ -31,14 +31,14 @@ export async function generateMetadata({
         'Expert GoHighLevel tutorials, automation guides, AI agent setup walkthroughs, and GHL case studies from the GHL Prime team.',
       url: 'https://ghlprime.com/blog',
       type: 'website',
-      images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+      images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     },
     twitter: {
       card: 'summary_large_image',
       title: 'GoHighLevel Blog Tips, Guides & Case Studies | GHL Prime',
       description:
         'Expert GoHighLevel tutorials, automation guides, AI agent setup walkthroughs, and GHL case studies from the GHL Prime team.',
-      images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+      images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     },
     other: {
       'last-modified': '2026-05-24',

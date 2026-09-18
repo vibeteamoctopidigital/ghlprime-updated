@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     description:
       'See how GHL Prime built Voice AI systems, CRM migrations, n8n automations, and AI agents for agencies across home services, SaaS, real estate, and e-commerce.',
     url: 'https://ghlprime.com/case-studies',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     type: 'website',
   },
   twitter: {
     title: 'GoHighLevel Case Studies Real Agency Results | GHL Prime',
     description:
       'See how GHL Prime built Voice AI systems, CRM migrations, n8n automations, and AI agents for agencies across home services, SaaS, real estate, and e-commerce.',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   other: {
     'last-modified': '2026-05-24',

@@ -21,14 +21,14 @@ export const metadata: Metadata = {
     description:
       'Hire a dedicated GoHighLevel AI automation team to set up your CRM, automations, and AI agents  built for agencies and Local Businesses. GHL-certified, US-based, 24/7 support.',
     url: 'https://ghlprime.com/',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     type: 'website',
   },
   twitter: {
     title: 'GoHighLevel Experts for Agencies | GHL Prime',
     description:
       'Hire a dedicated GoHighLevel AI automation team to set up your CRM, automations, and AI agents  built for agencies and Local Businesses. GHL-certified, US-based, 24/7 support.',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   other: {
     'last-modified': '2026-05-24',

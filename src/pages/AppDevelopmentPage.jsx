@@ -7,7 +7,7 @@ export const config = {
   seo: {
     title: 'Web & Mobile App Development Agency | GHL Prime',
     description: `Hire GHL Prime to build custom iOS, Android & web apps with React Native, Flutter, Next.js & Supabase. MVP to production, App Store included. Book a free call.`,
-    ogImage: 'https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg',
+    ogImage: 'https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png',
   },
   serviceSchema: {
     name: 'Web and Mobile App Development',

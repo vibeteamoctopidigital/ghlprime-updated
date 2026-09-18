@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       'GHL Prime is a dedicated GoHighLevel agency built to serve other agencies. Strategy-led delivery, GHL-certified specialists, and fully white-labeled execution.',
     url: 'https://ghlprime.com/about',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
     type: 'website',
     siteName: 'GHL Prime',
     locale: 'en_US',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: 'About GHL Prime Your GoHighLevel Backend Team',
     description:
       'GHL Prime is a dedicated GoHighLevel agency built to serve other agencies. Strategy-led delivery, GHL-certified specialists, and fully white-labeled execution.',
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   other: {
     'last-modified': '2026-05-24',

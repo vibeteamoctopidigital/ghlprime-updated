@@ -49,11 +49,11 @@ export const metadata: Metadata = {
     type: 'website',
     // Site-wide fallback social preview image -- used whenever a page's own
     // metadata export doesn't set its own `openGraph.images`/`twitter.images`.
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   twitter: {
     card: 'summary_large_image', // <meta name="twitter:card" content="summary_large_image" />
-    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.jpeg'],
+    images: ['https://ghlprime.com/og-ghlprime-gohighlevel-expert-agency.png'],
   },
   icons: {
     // <link rel="icon" href="/favicon.ico" sizes="32x32" />
