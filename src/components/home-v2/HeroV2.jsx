@@ -36,11 +36,16 @@ export default function HeroV2({ activePill, rotatingPills }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9 }}
           >
-            Hire a Dedicated Team of{' '}
+            {/* Hire a Dedicated Team of{' '}
             <span className="hv2-nowrap">
               <span className="go">Go</span><span className="high">High</span><span className="level">Level</span>
             </span>{' '}
-            Automation Experts.
+            Automation Experts. */}
+            Hire a Dedicated Team of <span class="hv2-nowrap"><span class="go">Go</span><span class="high">High</span><span class="level">Level</span></span> Automation Experts.
+   
+    Or Hire <span class="hv2-nowrap"><span class="high">Individual </span><span class="level">Specialists</span>
+     
+</span>
           </motion.h1>
 
           <motion.p
@@ -50,7 +55,7 @@ export default function HeroV2({ activePill, rotatingPills }) {
             transition={{ type: 'spring', stiffness: 120, damping: 20, mass: 0.9, delay: 0.1 }}
           >
             GHL Prime is a specialist expert team you hire to run the technical side of your
-            agency, GHL builds, automation workflows, AI agents, vibe coding, and 24/7 client
+            agency, also you can hire individual specialists for specific projects. GHL builds, automation workflows, AI agents, vibe coding, and 24/7 client
             support. All under your brand.
           </motion.p>
 
