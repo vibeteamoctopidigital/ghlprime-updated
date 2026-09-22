@@ -1,85 +1,49 @@
-// Data layer for /admin/blog-writer and /admin/blog-schedules — same
-// fetch-wrapper pattern every other admin *Api.js file already uses
-// (see blogApi.js). Every route here is admin-gated on the backend, so
-// every call passes { auth: true }.
+// Data layer for /admin/blog-writer and /admin/blog-schedules — the same
+// fetch-wrapper pattern every other admin *Api.js file uses. Every route is
+// admin-gated on the backend, so every call passes { auth: true }.
+//
+// Every helper resolves to `{ data, error }`; callers throw `error` into their
+// own toast. The shapes of `data` are the backend's blogWriter.service.ts
+// return values, one to one.
 
-import { apiDelete, apiGet, apiPost, apiPut } from './apiClient'
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from './apiClient'
 
 const BASE = '/api/blog-writer'
+const AUTH = { auth: true }
 
-export async function fetchBlogWriterStatus() {
-  const { data, error } = await apiGet(`${BASE}/status`, { auth: true })
-  return { data, error }
-}
+/** Everything the writer screen needs in one round trip. */
+export const fetchBlogWriterState = () => apiGet(`${BASE}/state`, AUTH)
 
-export async function fetchBlogWriterSettings() {
-  const { data, error } = await apiGet(`${BASE}/settings`, { auth: true })
-  return { data, error }
-}
+export const createBlogTopic = (payload) => apiPost(`${BASE}/topics`, payload, AUTH)
+export const bulkAddBlogTopics = (topics) => apiPost(`${BASE}/topics/bulk`, { topics }, AUTH)
+export const updateBlogTopic = (id, payload) => apiPatch(`${BASE}/topics/${encodeURIComponent(id)}`, payload, AUTH)
+export const deleteBlogTopic = (id) => apiDelete(`${BASE}/topics/${encodeURIComponent(id)}`, AUTH)
+export const reorderBlogTopics = (ids) => apiPost(`${BASE}/topics/reorder`, { ids }, AUTH)
 
-export async function updateBlogWriterSettings(payload) {
-  const { data, error } = await apiPut(`${BASE}/settings`, payload, { auth: true })
-  return { data, error }
-}
+export const fetchBlogWriterDefaults = () => apiGet(`${BASE}/defaults`, AUTH)
+export const saveBlogWriterDefaults = (defaults) => apiPut(`${BASE}/defaults`, defaults, AUTH)
+export const applyBlogWriterDefaults = () => apiPost(`${BASE}/defaults/apply`, {}, AUTH)
 
-export async function stopBlogWriterQueue() {
-  const { data, error } = await apiPost(`${BASE}/stop`, {}, { auth: true })
-  return { data, error }
-}
+export const importBlogSheet = (payload) => apiPost(`${BASE}/import-sheet`, payload, AUTH)
 
-export async function fetchBlogTopics() {
-  const { data, error } = await apiGet(`${BASE}/topics`, { auth: true })
-  return { data: data || [], error }
-}
+/** "Write next post" ({}), "Write all" ({ all: true }), or one topic ({ topicId }). */
+export const requestBlogWrite = (payload = {}) => apiPost(`${BASE}/request`, payload, AUTH)
+export const stopBlogBatch = () => apiDelete(`${BASE}/batch`, AUTH)
+export const closeBlogSummary = () => apiDelete(`${BASE}/summary`, AUTH)
 
-export async function createBlogTopic(payload) {
-  const { data, error } = await apiPost(`${BASE}/topics`, payload, { auth: true })
-  return { data, error }
-}
+export const dismissBlogRun = (id) => apiDelete(`${BASE}/runs/${encodeURIComponent(id)}`, AUTH)
+export const retryBlogRun = (id) => apiPost(`${BASE}/runs/${encodeURIComponent(id)}/retry`, {}, AUTH)
 
-export async function deleteBlogTopic(id) {
-  const { error } = await apiDelete(`${BASE}/topics/${encodeURIComponent(id)}`, { auth: true })
-  return { error }
-}
+export const fetchBlogSchedules = () => apiGet(`${BASE}/schedules`, AUTH)
+export const createBlogSchedule = (payload = {}) => apiPost(`${BASE}/schedules`, payload, AUTH)
+export const updateBlogSchedule = (id, payload) => apiPatch(`${BASE}/schedules/${encodeURIComponent(id)}`, payload, AUTH)
+export const deleteBlogSchedule = (id) => apiDelete(`${BASE}/schedules/${encodeURIComponent(id)}`, AUTH)
 
-export async function fetchBlogWriteRequests({ status, cursor, limit } = {}) {
-  const params = new URLSearchParams()
-  if (status) params.set('status', status)
-  if (cursor) params.set('cursor', cursor)
+export const fetchScheduleKeywords = (id, { skip = 0, limit } = {}) => {
+  const params = new URLSearchParams({ skip: String(skip) })
   if (limit) params.set('limit', String(limit))
-  const qs = params.toString()
-
-  const { data, error } = await apiGet(`${BASE}/requests${qs ? `?${qs}` : ''}`, { auth: true })
-  return { data: data?.data || [], nextCursor: data?.next_cursor || null, error }
+  return apiGet(`${BASE}/schedules/${encodeURIComponent(id)}/keywords?${params.toString()}`, AUTH)
 }
+export const addScheduleKeywords = (id, payload) => apiPost(`${BASE}/schedules/${encodeURIComponent(id)}/keywords`, payload, AUTH)
 
-/** Queues "write next post" — either { topic_id } from the queue, or { ad_hoc_title } typed straight in. */
-export async function createBlogWriteRequest(payload) {
-  const { data, error } = await apiPost(`${BASE}/requests`, payload, { auth: true })
-  return { data, error }
-}
-
-export async function retryBlogWriteRequest(id) {
-  const { data, error } = await apiPost(`${BASE}/requests/${encodeURIComponent(id)}/retry`, {}, { auth: true })
-  return { data, error }
-}
-
-export async function fetchBlogSchedules() {
-  const { data, error } = await apiGet(`${BASE}/schedules`, { auth: true })
-  return { data: data || [], error }
-}
-
-export async function createBlogSchedule(payload) {
-  const { data, error } = await apiPost(`${BASE}/schedules`, payload, { auth: true })
-  return { data, error }
-}
-
-export async function updateBlogSchedule(id, payload) {
-  const { data, error } = await apiPut(`${BASE}/schedules/${encodeURIComponent(id)}`, payload, { auth: true })
-  return { data, error }
-}
-
-export async function deleteBlogSchedule(id) {
-  const { error } = await apiDelete(`${BASE}/schedules/${encodeURIComponent(id)}`, { auth: true })
-  return { error }
-}
+export const transferBlogQueue = (payload = {}) => apiPost(`${BASE}/transfer`, payload, AUTH)

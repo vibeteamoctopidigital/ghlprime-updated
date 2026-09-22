@@ -1,21 +1,34 @@
 // Splits a post's HTML content into "before" and "after" halves so a CTA
 // banner can sit between them, without ever cutting the HTML mid-tag.
 //
-// Only ever called for posts that actually have a cta_variant (every
-// pre-existing post has this as null/undefined, since it's one of the new
-// optional Blog Writer columns) — see BlogPostPage.jsx's usage. A post
-// without one renders exactly as it always has.
+// Two ways a post says where the banner goes:
+//
+//   1. A slot the Blog Writer's importer left behind — the writer places a
+//      [[CTA]] token at one natural break and the importer swaps it for an
+//      empty paragraph carrying CTA_PLACEHOLDER_CLASS. That is the writer's
+//      own choice of position and it wins outright.
+//   2. Nothing. Hand-written posts, and everything written before the slot
+//      existed, are split after the third block element instead, which is
+//      good enough for where a banner visually belongs.
+//
+// Only ever called for posts that actually have a cta_variant; a post without
+// one renders exactly as it always has.
 
-const BLOCK_CLOSE_TAGS = ['</p>', '</h2>', '</h3>', '</ul>', '</ol>', '</blockquote>', '</figure>']
+/** Must match CTA_PLACEHOLDER_CLASS in the backend's lib/image-placement.ts. */
+export const CTA_PLACEHOLDER_CLASS = 'ghl-cta-placeholder'
 
-/**
- * Finds every index right after a top-level block element closes, then picks
- * the one closest to (but not past) the target paragraph count — "paragraph"
- * here loosely means "one block element," which is good enough for where a
- * CTA banner visually belongs.
- */
+const SLOT_RE = /<p\b[^>]*\bclass=["'][^"']*\bghl-cta-placeholder\b[^"']*["'][^>]*>\s*<\/p>/i
+
+const BLOCK_CLOSE_TAGS = ['</p>', '</h2>', '</h3>', '</ul>', '</ol>', '</blockquote>', '</figure>', '</table>']
+
 export function splitContentForCta(html, { afterBlocks = 3 } = {}) {
   if (!html || typeof html !== 'string') return { before: html || '', after: '' }
+
+  // The writer's own slot, when there is one.
+  const slot = SLOT_RE.exec(html)
+  if (slot) {
+    return { before: html.slice(0, slot.index), after: html.slice(slot.index + slot[0].length) }
+  }
 
   const breakpoints = []
   let searchFrom = 0
@@ -36,8 +49,7 @@ export function splitContentForCta(html, { afterBlocks = 3 } = {}) {
   }
 
   if (breakpoints.length <= afterBlocks) {
-    // Short post — not enough blocks to split meaningfully. The banner goes
-    // at the very end instead of not appearing at all.
+    // Short post — the banner goes at the very end instead of not appearing.
     return { before: html, after: '' }
   }
 
