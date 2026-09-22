@@ -1,12 +1,20 @@
 import type { Metadata } from 'next'
 import BlogPostPage from '../../../pages/BlogPostPage'
 import contentSnapshot from '../../../data/contentSnapshot.json'
+import { API_BASE_URL } from '../../../lib/apiClient'
 
 // Same seed contentSnapshot.blogPosts BlogPostPage.jsx itself reads for its
 // synchronous first-paint post (see SEEDED_POSTS there). contentSnapshot.json
-// is regenerated fresh from Supabase by scripts/generate-content-snapshot.mjs,
+// is regenerated fresh from the API by scripts/generate-content-snapshot.mjs,
 // which still runs immediately before `next build` (see package.json), so
 // this is exactly as fresh as the seed the client component uses.
+//
+// A post published/edited AFTER the last build won't be in this snapshot yet.
+// BlogPostPage.jsx still renders it fine (it fetches live client-side), but
+// generateMetadata runs server-side and has no client-side re-run -- so
+// without a live fallback here, the tab title/meta tags stay stuck on
+// "Post not found" even though the page body is showing real content.
+// fetchLivePost() below is that fallback: only hit when the snapshot misses.
 type SnapshotPost = {
   slug: string
   title: string
@@ -25,6 +33,19 @@ function findSeededPost(slug: string) {
   return SEEDED_POSTS.find((post) => post.slug === slug) || null
 }
 
+async function fetchLivePost(slug: string): Promise<SnapshotPost | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/blog/slug/${slug}`, {
+      next: { revalidate: 300 },
+    })
+    if (!res.ok) return null
+    const payload = await res.json()
+    return payload?.data || null
+  } catch {
+    return null
+  }
+}
+
 export function generateStaticParams() {
   return SEEDED_POSTS.map((post) => ({ slug: post.slug }))
 }
@@ -38,7 +59,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const post = findSeededPost(slug)
+  const post = findSeededPost(slug) || (await fetchLivePost(slug))
 
   if (!post) {
     return {

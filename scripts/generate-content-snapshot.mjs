@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..')
 const outPath = path.join(root, 'src', 'data', 'contentSnapshot.json')
 
 // Read the existing committed snapshot defensively. This is the second-priority
-// source: if the live Supabase fetch returns nothing, we must NOT downgrade to
+// source: if the live API fetch returns nothing, we must NOT downgrade to
 // the tiny local fallback arrays — we keep whatever real data is already on disk.
 let existingSnapshot = { blogPosts: [], caseStudies: [] }
 try {
@@ -22,10 +22,14 @@ try {
   // no existing snapshot — fine
 }
 
-// Best-effort credential parsing — mirrors generate-sitemap.mjs. NEVER throws:
-// missing creds or a failed fetch must not fail the build.
-async function readSupabaseCreds() {
-  const creds = { url: '', anonKey: '' }
+// Best-effort API base resolution — mirrors generate-sitemap.mjs. NEVER
+// throws: a missing/unreadable .env or a failed fetch must not fail the
+// build. The backend dropped Supabase for a self-hosted Postgres+Prisma API
+// (see backend commit "removed supabase and migrate with prisma"), so this
+// reads straight from that API instead of Supabase's REST endpoint, which is
+// no longer the source of truth.
+async function readApiBase() {
+  let base = ''
   try {
     const envPath = path.join(root, '.env')
     const raw = await fs.readFile(envPath, 'utf8')
@@ -39,15 +43,13 @@ async function readSupabaseCreds() {
       if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1)
       }
-      if (key === 'VITE_SUPABASE_URL') creds.url = value
-      if (key === 'VITE_SUPABASE_ANON_KEY') creds.anonKey = value
+      if (key === 'VITE_API_URL') base = value
     }
   } catch {
     // .env not present — fall through to process.env
   }
-  if (!creds.url) creds.url = process.env.VITE_SUPABASE_URL || ''
-  if (!creds.anonKey) creds.anonKey = process.env.VITE_SUPABASE_ANON_KEY || ''
-  return creds
+  if (!base) base = process.env.VITE_API_URL || ''
+  return base || 'https://api.ghlprime.com'
 }
 
 function sortByPublishedAtDesc(posts) {
@@ -61,20 +63,19 @@ function sortByPublishedAtDesc(posts) {
 const fallbackBlogPosts = sortByPublishedAtDesc(blogPosts.filter((post) => post.published !== false))
 const fallbackCaseStudies = [...caseStudies]
 
-async function fetchRows(url, anonKey, query) {
-  const res = await fetch(`${url}/rest/v1/${query}`, {
-    headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
-  })
+async function fetchRows(base, apiPath) {
+  const res = await fetch(`${base}${apiPath}`)
   if (!res.ok) {
-    console.log(`Supabase responded ${res.status} for ${query}.`)
+    console.log(`API responded ${res.status} for ${apiPath}.`)
     return null
   }
-  const rows = await res.json()
+  const payload = await res.json()
+  const rows = payload?.data
   return Array.isArray(rows) ? rows : null
 }
 
 // Priority for what gets written (per array, independently):
-//   1. Live Supabase fetch result, if non-empty (set below).
+//   1. Live API fetch result, if non-empty (set below).
 //   2. Existing committed snapshot, if non-empty (defaulted here).
 //   3. Local fallback arrays (blogPosts.js / caseStudies.js).
 // Initialising to existing-then-local guarantees the catch / no-creds paths
@@ -85,35 +86,24 @@ let usedFreshBlogPosts = false
 let usedFreshCaseStudies = false
 
 try {
-  const { url, anonKey } = await readSupabaseCreds()
-  if (url && anonKey) {
-    const fetchedPosts = await fetchRows(
-      url,
-      anonKey,
-      'blog_posts?select=*&published=eq.true&order=published_at.desc',
-    )
-    if (fetchedPosts && fetchedPosts.length) {
-      snapshotBlogPosts = fetchedPosts
-      usedFreshBlogPosts = true
-      console.log('Using live blog posts from Supabase.')
-    } else {
-      console.log('No live blog rows — keeping existing-snapshot-or-local blog posts.')
-    }
+  const base = await readApiBase()
 
-    const fetchedStudies = await fetchRows(
-      url,
-      anonKey,
-      'case_studies?select=*&published=eq.true&order=created_at.desc',
-    )
-    if (fetchedStudies && fetchedStudies.length) {
-      snapshotCaseStudies = fetchedStudies
-      usedFreshCaseStudies = true
-      console.log('Using live case studies from Supabase.')
-    } else {
-      console.log('No live case studies — keeping existing-snapshot-or-local case studies.')
-    }
+  const fetchedPosts = await fetchRows(base, '/api/blog')
+  if (fetchedPosts && fetchedPosts.length) {
+    snapshotBlogPosts = sortByPublishedAtDesc(fetchedPosts)
+    usedFreshBlogPosts = true
+    console.log('Using live blog posts from the API.')
   } else {
-    console.log('Supabase credentials not found — using local fallback content.')
+    console.log('No live blog rows — keeping existing-snapshot-or-local blog posts.')
+  }
+
+  const fetchedStudies = await fetchRows(base, '/api/case-studies')
+  if (fetchedStudies && fetchedStudies.length) {
+    snapshotCaseStudies = fetchedStudies
+    usedFreshCaseStudies = true
+    console.log('Using live case studies from the API.')
+  } else {
+    console.log('No live case studies — keeping existing-snapshot-or-local case studies.')
   }
 } catch (error) {
   console.log(`Snapshot fetch failed (${error?.message || 'unknown error'}) — using local fallback content.`)

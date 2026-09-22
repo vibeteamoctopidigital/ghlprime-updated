@@ -126,16 +126,6 @@ export default function BlogIndexPage() {
     return result
   }, [activeCategory, posts, normalizedQuery])
 
-  const featuredPost = useMemo(() => {
-    if (activeCategory !== 'All' || normalizedQuery || !posts.length) return null
-    return posts.find((post) => post.featured === true) || posts[0]
-  }, [activeCategory, normalizedQuery, posts])
-
-  const gridPosts = useMemo(() => {
-    if (!featuredPost) return filteredPosts
-    return filteredPosts.filter((post) => post.slug !== featuredPost.slug)
-  }, [filteredPosts, featuredPost])
-
   return (
     <main className="blog-index-page">
       {/* title/meta/canonical/robots moved to app/blog/page.tsx's metadata
@@ -204,35 +194,9 @@ export default function BlogIndexPage() {
             ))}
           </div>
 
-          {featuredPost ? (
-            <Link href={`/blog/${featuredPost.slug}`} className="blog-featured-card blog-card-link" aria-label={`Read ${featuredPost.title}`}>
-              {featuredPost.cover_image ? (
-                <div className="blog-featured-image-wrap">
-                  <img src={featuredPost.cover_image} alt={featuredPost.title} className="blog-featured-image" loading="eager" decoding="async" onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }} />
-                </div>
-              ) : null}
-              <div className="blog-featured-body">
-                <span className="blog-card-badge">{featuredPost.category}</span>
-                <h2>{featuredPost.title}</h2>
-                <p className="blog-featured-excerpt">{featuredPost.excerpt}</p>
-                <div className="blog-card-meta">
-                  <span>{featuredPost.author || 'GHL Prime Team'}</span>
-                  <span aria-hidden="true">•</span>
-                  <span>{formatBlogDate(featuredPost.published_at)}</span>
-                  {featuredPost.reading_time ? (
-                    <>
-                      <span aria-hidden="true">•</span>
-                      <span>{featuredPost.reading_time} min read</span>
-                    </>
-                  ) : null}
-                </div>
-              </div>
-            </Link>
-          ) : null}
-
-          {gridPosts.length ? (
+          {filteredPosts.length ? (
             <div className="blog-grid">
-              {gridPosts.map((post) => (
+              {filteredPosts.map((post) => (
                 <BlogCard key={post.slug} post={post} />
               ))}
             </div>

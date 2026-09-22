@@ -16,6 +16,12 @@ const publicDir = path.join(root, 'public')
 
 const LASTMOD = '2026-05-31'
 
+function toDateOnly(value) {
+  if (!value) return LASTMOD
+  const d = new Date(value)
+  return Number.isNaN(d.getTime()) ? LASTMOD : d.toISOString().slice(0, 10)
+}
+
 const routes = [
   { loc: 'https://ghlprime.com/', changefreq: 'weekly', priority: '1.0' },
   { loc: 'https://ghlprime.com/services', changefreq: 'monthly', priority: '0.9' },
@@ -41,10 +47,15 @@ const routes = [
   { loc: 'https://ghlprime.com/terms', changefreq: 'yearly', priority: '0.3' },
 ]
 
-// Best-effort: append published blog post URLs from Supabase. Never throw â€” if
-// creds are missing or the fetch fails, we just keep the static routes above.
-async function readSupabaseCreds() {
-  const creds = { url: '', anonKey: '' }
+// Best-effort: append published blog post URLs from the live API. Never
+// throw — if the API is unreachable, we just keep the static routes above.
+// The backend dropped Supabase for a self-hosted Postgres+Prisma API (see
+// backend commit "removed supabase and migrate with prisma"), so this reads
+// straight from that API instead of Supabase's REST endpoint, which is no
+// longer the source of truth and was silently leaving new posts out of the
+// sitemap.
+async function readApiBase() {
+  let base = ''
   try {
     const envPath = path.join(root, '.env')
     const raw = await fs.readFile(envPath, 'utf8')
@@ -58,77 +69,70 @@ async function readSupabaseCreds() {
       if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1)
       }
-      if (key === 'VITE_SUPABASE_URL') creds.url = value
-      if (key === 'VITE_SUPABASE_ANON_KEY') creds.anonKey = value
+      if (key === 'VITE_API_URL') base = value
     }
   } catch {
     // .env not present â€” fall through to process.env
   }
-  if (!creds.url) creds.url = process.env.VITE_SUPABASE_URL || ''
-  if (!creds.anonKey) creds.anonKey = process.env.VITE_SUPABASE_ANON_KEY || ''
-  return creds
+  if (!base) base = process.env.VITE_API_URL || ''
+  return base || 'https://api.ghlprime.com'
 }
 
 try {
-  const { url, anonKey } = await readSupabaseCreds()
-  if (url && anonKey) {
-    const res = await fetch(`${url}/rest/v1/blog_posts?select=slug,updated_at&published=eq.true`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
-    })
-    if (res.ok) {
-      const rows = await res.json()
-      if (Array.isArray(rows)) {
-        for (const row of rows) {
-          if (row && row.slug) {
-            if (MERGED_BLOG_SLUGS.has(row.slug)) continue
-            routes.push({ loc: `https://ghlprime.com/blog/${row.slug}`, changefreq: 'monthly', priority: '0.7' })
-          }
+  const base = await readApiBase()
+  const res = await fetch(`${base}/api/blog`)
+  if (res.ok) {
+    const payload = await res.json()
+    const rows = payload?.data
+    if (Array.isArray(rows)) {
+      for (const row of rows) {
+        if (row && row.slug) {
+          if (MERGED_BLOG_SLUGS.has(row.slug)) continue
+          routes.push({
+            loc: `https://ghlprime.com/blog/${row.slug}`,
+            changefreq: 'monthly',
+            priority: '0.7',
+            lastmod: toDateOnly(row.updated_at || row.published_at),
+          })
         }
-        console.log(`Added ${rows.length} published blog post URLs from Supabase.`)
       }
-    } else {
-      console.log(`Skipping blog slugs: Supabase responded ${res.status}.`)
+      console.log(`Added ${rows.length} published blog post URLs from the API.`)
     }
   } else {
-    console.log('Skipping blog slugs: Supabase credentials not found.')
+    console.log(`Skipping blog slugs: API responded ${res.status}.`)
   }
 } catch (error) {
   console.log(`Skipping blog slugs: ${error?.message || 'fetch failed'}.`)
 }
 
-// Best-effort: append published case study URLs from Supabase. Never throw â€” if
-// creds are missing or the fetch fails, we fall back to the 3 local-fallback
+// Best-effort: append published case study URLs from the live API. Never
+// throw — if the API is unreachable, we fall back to the 3 local-fallback
 // slugs only. The 3 fallbacks are always included and de-duped against the DB.
 const caseStudyFallbackSlugs = [
 ]
-const caseStudySlugSet = new Set()
+const caseStudySlugMap = new Map()
 try {
-  const { url, anonKey } = await readSupabaseCreds()
-  if (url && anonKey) {
-    const res = await fetch(`${url}/rest/v1/case_studies?select=slug,updated_at&published=eq.true`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
-    })
-    if (res.ok) {
-      const rows = await res.json()
-      if (Array.isArray(rows)) {
-        for (const row of rows) {
-          if (row && row.slug) caseStudySlugSet.add(row.slug)
-        }
-        console.log(`Added ${caseStudySlugSet.size} published case study slugs from Supabase.`)
+  const base = await readApiBase()
+  const res = await fetch(`${base}/api/case-studies`)
+  if (res.ok) {
+    const payload = await res.json()
+    const rows = payload?.data
+    if (Array.isArray(rows)) {
+      for (const row of rows) {
+        if (row && row.slug) caseStudySlugMap.set(row.slug, toDateOnly(row.updated_at))
       }
-    } else {
-      console.log(`Skipping case study slugs: Supabase responded ${res.status}.`)
+      console.log(`Added ${caseStudySlugMap.size} published case study slugs from the API.`)
     }
   } else {
-    console.log('Skipping case study slugs: Supabase credentials not found.')
+    console.log(`Skipping case study slugs: API responded ${res.status}.`)
   }
 } catch (error) {
   console.log(`Skipping case study slugs: ${error?.message || 'fetch failed'}.`)
 }
 // Always include the 3 local-fallback slugs (de-duped against the DB results).
-for (const slug of caseStudyFallbackSlugs) caseStudySlugSet.add(slug)
-for (const slug of caseStudySlugSet) {
-  routes.push({ loc: `https://ghlprime.com/case-studies/${slug}`, changefreq: 'yearly', priority: '0.7' })
+for (const slug of caseStudyFallbackSlugs) if (!caseStudySlugMap.has(slug)) caseStudySlugMap.set(slug, LASTMOD)
+for (const [slug, lastmod] of caseStudySlugMap) {
+  routes.push({ loc: `https://ghlprime.com/case-studies/${slug}`, changefreq: 'yearly', priority: '0.7', lastmod })
 }
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -136,7 +140,7 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
 ${routes
   .map(
     (r) =>
-      `  <url><loc>${r.loc}</loc><lastmod>${LASTMOD}</lastmod><changefreq>${r.changefreq}</changefreq><priority>${r.priority}</priority></url>`,
+      `  <url><loc>${r.loc}</loc><lastmod>${r.lastmod || LASTMOD}</lastmod><changefreq>${r.changefreq}</changefreq><priority>${r.priority}</priority></url>`,
   )
   .join('\n')}
 </urlset>
