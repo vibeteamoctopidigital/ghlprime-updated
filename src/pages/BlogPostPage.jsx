@@ -165,7 +165,7 @@ export default function BlogPostPage() {
 
         {post.cover_image ? (
           <figure className="blog-post-hero">
-            <img src={post.cover_image} alt={post.title} className="blog-post-hero-image" loading="eager" decoding="async" onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }} />
+            <img src={post.cover_image} alt={post.cover_image_alt || post.title} className="blog-post-hero-image" loading="eager" decoding="async" onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }} />
           </figure>
         ) : null}
 
@@ -189,7 +189,7 @@ export default function BlogPostPage() {
             Blog Writer columns every pre-existing post has as null, so this
             renders exactly as it always did for every post written before
             this feature existed. */}
-        {post.cta_variant ? (
+        {post.cta_variant && post.cta_variant !== 'none' ? (
           (() => {
             const { before, after } = splitContentForCta(post.content)
             return (
