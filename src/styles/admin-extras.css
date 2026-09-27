@@ -301,6 +301,17 @@
   gap: 0.75rem;
   margin-bottom: 1.25rem;
 }
+/* The global `h1,h2,h3,h4` rule only sets a font-family, not a color, so
+   these titles otherwise inherit body's --text (#1a2a40, a dark navy meant
+   for the site's white-background pages) and go nearly invisible against
+   this panel's dark background. Every other admin surface avoids this by
+   using classed elements (.admin-hero-panel h1, .blog-writer-section h3
+   below) that already set color explicitly -- these two page titles were
+   the one plain, unclassed <h2> left uncovered. */
+.blog-writer-topbar h2 {
+  margin: 0;
+  color: #fff;
+}
 .blog-writer-section {
   border: 1px solid rgba(132, 164, 218, 0.16);
   border-radius: 16px;
@@ -312,6 +323,46 @@
   margin: 0 0 0.9rem;
   font-size: 1rem;
   color: #eaf2ff;
+}
+/* Same story as the h2 above: a bare <label> in these sections (the
+   auto-publish / enabled-immediately checkboxes) inherits the dark navy
+   body text color instead of the light color every other admin label uses. */
+.blog-writer-section > label {
+  color: #dce9ff;
+}
+/* Plain <input>/<select>/<textarea> here (not wrapped in .admin-form-grid,
+   which is what normally supplies this) fell through to the browser
+   default -- a solid white box with dark text -- which is exactly right for
+   the site's public forms and exactly wrong against this dark panel.
+   Restyled to match .admin-form-grid input's look so every admin surface
+   reads as one consistent dark theme. */
+.blog-writer-inline-form input,
+.blog-writer-inline-form select,
+.blog-writer-section textarea {
+  width: 100%;
+  border: 1px solid rgba(137, 177, 228, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border-radius: 0.85rem;
+  padding: 0.7rem 0.9rem;
+  outline: none;
+  font: inherit;
+}
+.blog-writer-inline-form input::placeholder,
+.blog-writer-section textarea::placeholder {
+  color: rgba(212, 226, 248, 0.35);
+}
+.blog-writer-inline-form input:focus,
+.blog-writer-inline-form select:focus,
+.blog-writer-section textarea:focus {
+  border-color: rgba(86, 188, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(38, 163, 255, 0.12);
+}
+.blog-writer-inline-form select option {
+  color: #16283f;
+}
+.blog-writer-section textarea {
+  resize: vertical;
 }
 .blog-writer-queue-row {
   display: flex;
@@ -330,8 +381,15 @@
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
-.blog-writer-inline-form input,
-.blog-writer-inline-form select {
+/* Direct children only: a row of bare inputs (the ad-hoc/topic-queue forms)
+   should each claim ~200px of the row's width. Once an input is wrapped in
+   a <label> for a field caption (Queue defaults below), it's no longer a
+   direct child of this row -- and critically, it becomes a flex item of
+   that *column*-direction label instead, where a 200px flex-basis sets
+   HEIGHT, not width. Scoping to `>` keeps this rule from reaching those
+   nested inputs and blowing them up to 200px tall. */
+.blog-writer-inline-form > input,
+.blog-writer-inline-form > select {
   flex: 1 1 200px;
 }
 .blog-writer-schedule-card {
@@ -348,9 +406,24 @@
   gap: 0.6rem;
   margin-bottom: 0.5rem;
 }
+.blog-writer-schedule-card .schedule-head strong {
+  color: #fff;
+}
 .blog-writer-schedule-card .schedule-meta {
   font-size: 0.82rem;
   color: #9db2d6;
+}
+/* The "Posts per run / Images per post / Words per post / CTA banner"
+   labels in Queue defaults are plain <label> wrapping a plain <input>,
+   outside .blog-writer-inline-form -- same dark-navy-on-dark and
+   white-box-on-dark bugs as above, fixed the same way. */
+.blog-writer-section .blog-writer-inline-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #d9e8ff;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 .blog-writer-empty {
   padding: 1.5rem 0;
