@@ -2,37 +2,45 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ExternalLink, Play, Plus, RefreshCw, Square, Trash2 } from 'lucide-react'
+import { ExternalLink, Play, Plus, RefreshCw, Square, Trash2, X } from 'lucide-react'
 import AdminShell from '../components/AdminShell'
 import { getSession, signOut } from '../lib/auth'
 import {
   createBlogTopic,
-  createBlogWriteRequest,
   deleteBlogTopic,
-  fetchBlogTopics,
-  fetchBlogWriteRequests,
-  fetchBlogWriterSettings,
-  fetchBlogWriterStatus,
-  retryBlogWriteRequest,
-  stopBlogWriterQueue,
-  updateBlogWriterSettings,
+  dismissBlogRun,
+  fetchBlogWriterState,
+  requestBlogWrite,
+  retryBlogRun,
+  saveBlogDefaults,
+  stopBlogBatch,
 } from '../lib/blogWriterApi'
 import '../styles/admin-extras.css'
 
-const STATUS_POLL_MS = 15_000
-const REQUESTS_POLL_MS = 10_000
+const STATE_POLL_MS = 10_000
 
-function StatusBadge({ status }) {
-  if (!status) return null
+// Mirrors GHL-Prime-Backend's src/modules/blog-writer/lib/cta-variants.ts —
+// that file is the source of truth; kept here only as the dropdown's option
+// list since the two repos don't share code.
+const CTA_VARIANTS = [
+  { id: 'none', label: 'No banner' },
+  { id: 'general', label: 'Hire a dedicated GoHighLevel team' },
+  { id: 'automation', label: 'Want this automated?' },
+  { id: 'support', label: 'Need a team who handles this?' },
+  { id: 'ai_agents', label: 'Curious what an AI agent could do here?' },
+]
+
+function StatusBadge({ writer, activeRequest }) {
+  if (!writer) return null
 
   let label = 'Offline'
   let variant = 'offline'
-  if (status.online) {
-    if (status.running_count > 0) {
+  if (writer.online) {
+    if (activeRequest?.status === 'running') {
       label = 'Writing now'
       variant = 'online'
-    } else if (status.waiting_count > 0) {
-      label = 'Paused'
+    } else if (activeRequest?.status === 'waiting') {
+      label = 'Paused (usage limit)'
       variant = 'paused'
     } else {
       label = 'Online'
@@ -74,11 +82,11 @@ function PhaseList({ steps, phase }) {
   )
 }
 
-const STATUS_LABELS = {
+const RUN_STATUS_LABELS = {
   pending: 'Waiting for the watcher',
   running: 'Writing now',
   waiting: 'Paused, will retry automatically',
-  completed: 'Done',
+  done: 'Done',
   failed: 'Failed',
 }
 
@@ -91,49 +99,29 @@ function formatDate(iso) {
 
 export default function AdminBlogWriterPage() {
   const [session, setSession] = useState(undefined)
-  const [status, setStatus] = useState(null)
-  const [topics, setTopics] = useState([])
-  const [requests, setRequests] = useState([])
-  const [settings, setSettings] = useState(null)
+  const [state, setState] = useState(null)
   const [newTopicTitle, setNewTopicTitle] = useState('')
-  const [newTopicKeyword, setNewTopicKeyword] = useState('')
+  const [newTopicNotes, setNewTopicNotes] = useState('')
   const [adHocTitle, setAdHocTitle] = useState('')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const refreshStatus = useCallback(async () => {
-    const { data } = await fetchBlogWriterStatus()
-    if (data) setStatus(data)
-  }, [])
-
-  const refreshTopics = useCallback(async () => {
-    const { data } = await fetchBlogTopics()
-    setTopics(data)
-  }, [])
-
-  const refreshRequests = useCallback(async () => {
-    const { data } = await fetchBlogWriteRequests({ limit: 20 })
-    setRequests(data)
+  const refreshState = useCallback(async () => {
+    const { data } = await fetchBlogWriterState()
+    if (data) setState(data)
   }, [])
 
   useEffect(() => {
     getSession().then(setSession)
-    fetchBlogWriterSettings().then(({ data }) => setSettings(data))
-    fetchBlogWriterStatus().then(({ data }) => data && setStatus(data))
-    fetchBlogTopics().then(({ data }) => setTopics(data))
-    fetchBlogWriteRequests({ limit: 20 }).then(({ data }) => setRequests(data))
-  }, [])
+    refreshState()
+  }, [refreshState])
 
-  // Live-ish polling: fast enough that a phase actually advancing on screen
-  // feels real, slow enough it's not hammering the API from an open tab.
+  // A single endpoint now covers topics, the active run, and recent runs, so
+  // one poll loop replaces the old separate status/requests timers.
   useEffect(() => {
-    const statusTimer = setInterval(refreshStatus, STATUS_POLL_MS)
-    const requestsTimer = setInterval(refreshRequests, REQUESTS_POLL_MS)
-    return () => {
-      clearInterval(statusTimer)
-      clearInterval(requestsTimer)
-    }
-  }, [refreshStatus, refreshRequests])
+    const timer = setInterval(refreshState, STATE_POLL_MS)
+    return () => clearInterval(timer)
+  }, [refreshState])
 
   async function handleSignOut() {
     await signOut()
@@ -145,8 +133,8 @@ export default function AdminBlogWriterPage() {
     if (!newTopicTitle.trim()) return
     setBusy(true)
     const { error } = await createBlogTopic({
-      title: newTopicTitle.trim(),
-      target_keyword: newTopicKeyword.trim() || undefined,
+      topic: newTopicTitle.trim(),
+      notes: newTopicNotes.trim() || undefined,
     })
     setBusy(false)
     if (error) {
@@ -154,8 +142,8 @@ export default function AdminBlogWriterPage() {
       return
     }
     setNewTopicTitle('')
-    setNewTopicKeyword('')
-    await refreshTopics()
+    setNewTopicNotes('')
+    await refreshState()
   }
 
   async function handleDeleteTopic(id) {
@@ -166,33 +154,45 @@ export default function AdminBlogWriterPage() {
       setMessage(`Could not delete topic: ${error.message}`)
       return
     }
-    await refreshTopics()
+    await refreshState()
   }
 
   async function handleWriteFromTopic(topicId) {
     setBusy(true)
-    const { error } = await createBlogWriteRequest({ topic_id: topicId })
+    const { error } = await requestBlogWrite({ topicId })
     setBusy(false)
     if (error) {
       setMessage(`Could not queue that topic: ${error.message}`)
       return
     }
     setMessage('Queued — the watcher will pick it up on its next poll.')
-    await Promise.all([refreshTopics(), refreshRequests()])
+    await refreshState()
   }
 
+  // There is no "write this exact text right now" route on the backend —
+  // only a topic id can be requested. Typing ad hoc text creates a topic
+  // first, then immediately requests a write for the new topic's id, which
+  // gives the same "type something, get it written now" result the old UI
+  // promised without inventing an endpoint that doesn't exist.
   async function queueAdHoc() {
     if (!adHocTitle.trim()) return
     setBusy(true)
-    const { error } = await createBlogWriteRequest({ ad_hoc_title: adHocTitle.trim() })
-    setBusy(false)
+    const { data, error } = await createBlogTopic({ topic: adHocTitle.trim() })
     if (error) {
+      setBusy(false)
       setMessage(`Could not queue that: ${error.message}`)
+      return
+    }
+    const { error: writeError } = await requestBlogWrite({ topicId: data.id })
+    setBusy(false)
+    if (writeError) {
+      setMessage(`Added to the queue, but could not start it: ${writeError.message}`)
+      await refreshState()
       return
     }
     setAdHocTitle('')
     setMessage('Queued — the watcher will pick it up on its next poll.')
-    await refreshRequests()
+    await refreshState()
   }
 
   async function handleAdHocWrite(e) {
@@ -202,49 +202,62 @@ export default function AdminBlogWriterPage() {
 
   async function handleRetry(id) {
     setBusy(true)
-    const { error } = await retryBlogWriteRequest(id)
+    const { error } = await retryBlogRun(id)
     setBusy(false)
     if (error) {
       setMessage(`Could not retry: ${error.message}`)
       return
     }
-    await refreshRequests()
+    await refreshState()
   }
 
-  async function handleStop() {
+  async function handleDismiss(id) {
     setBusy(true)
-    await stopBlogWriterQueue()
+    const { error } = await dismissBlogRun(id)
     setBusy(false)
-    setMessage('Stop requested — the post in progress will finish, the next one will wait for a normal poll.')
+    if (error) {
+      setMessage(`Could not dismiss: ${error.message}`)
+      return
+    }
+    await refreshState()
   }
 
-  /**
-   * The one obvious button: whatever's typed into the ad-hoc box wins if
-   * present, otherwise it runs the front of the topic queue. Only disabled
-   * when neither exists — there's nothing to run yet.
-   */
-  async function handleRunNow() {
-    const nextTopic = topics.find((t) => t.status === 'pending' || t.status === 'queued')
+  async function handleStopBatch() {
+    setBusy(true)
+    await stopBlogBatch()
+    setBusy(false)
+    setMessage('Batch stopped — the post being written now will finish; nothing after it will start.')
+    await refreshState()
+  }
 
+  /** The one obvious button: whatever's typed into the ad-hoc box wins if
+   * present, otherwise it requests the front of the topic queue. */
+  async function handleRunNow() {
     if (adHocTitle.trim()) {
       await queueAdHoc()
       return
     }
-    if (nextTopic) {
-      await handleWriteFromTopic(nextTopic.id)
+    if (state?.topics?.length) {
+      await handleWriteFromTopic(state.topics[0].id)
       return
     }
     setMessage('Nothing to run yet — type something above or add a topic to the queue first.')
   }
 
-  async function handleSettingsChange(field, value) {
-    const next = { ...settings, [field]: value }
-    setSettings(next)
-    const { error } = await updateBlogWriterSettings({ [field]: value })
-    if (error) setMessage(`Could not save settings: ${error.message}`)
+  async function handleDefaultsChange(field, value) {
+    if (!state?.defaults) return
+    const next = { ...state.defaults, [field]: value }
+    setState((s) => ({ ...s, defaults: next }))
+    // The backend's defaultsSchema requires every field on each save.
+    const { error } = await saveBlogDefaults(next)
+    if (error) setMessage(`Could not save defaults: ${error.message}`)
   }
 
-  const pendingTopics = topics.filter((t) => t.status === 'pending' || t.status === 'queued')
+  const topics = state?.topics || []
+  const activeRequest = state?.activeRequest || null
+  const recentRuns = state?.recentRuns || []
+  const defaults = state?.defaults || null
+  const batch = state?.batch
 
   return (
     <AdminShell session={session} onSignOut={handleSignOut}>
@@ -254,13 +267,15 @@ export default function AdminBlogWriterPage() {
           <span className="admin-list-meta">AI blog publishing via your Claude subscription — no metered API billing</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <StatusBadge status={status} />
+          <StatusBadge writer={state?.writer} activeRequest={activeRequest} />
           <button type="button" className="primary-pill" onClick={handleRunNow} disabled={busy}>
             <Play size={16} /> Run Now
           </button>
-          <button type="button" className="team-edit-btn" onClick={handleStop} disabled={busy}>
-            <Square size={14} /> Stop
-          </button>
+          {batch?.id ? (
+            <button type="button" className="team-edit-btn" onClick={handleStopBatch} disabled={busy}>
+              <Square size={14} /> Stop batch
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -283,34 +298,52 @@ export default function AdminBlogWriterPage() {
         </form>
       </div>
 
+      {activeRequest ? (
+        <div className="blog-writer-section">
+          <h3>Currently writing</h3>
+          <div className="blog-writer-queue-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+            <div className="grow">
+              <strong>{activeRequest.topicLabel || 'Untitled'}</strong>
+              <span>{RUN_STATUS_LABELS[activeRequest.status] || activeRequest.status}{activeRequest.detail ? ` · ${activeRequest.detail}` : ''}</span>
+            </div>
+            <PhaseList steps={activeRequest.steps} phase={activeRequest.phase} />
+          </div>
+        </div>
+      ) : null}
+
       <div className="blog-writer-section">
-        <h3>Topic queue ({pendingTopics.length})</h3>
+        <h3>Topic queue ({topics.length})</h3>
         <form className="blog-writer-inline-form" onSubmit={handleAddTopic}>
           <input
             type="text"
-            placeholder="Topic title"
+            placeholder="Topic"
             value={newTopicTitle}
             onChange={(e) => setNewTopicTitle(e.target.value)}
           />
           <input
             type="text"
-            placeholder="Target keyword (optional)"
-            value={newTopicKeyword}
-            onChange={(e) => setNewTopicKeyword(e.target.value)}
+            placeholder="Notes (optional)"
+            value={newTopicNotes}
+            onChange={(e) => setNewTopicNotes(e.target.value)}
           />
           <button type="submit" className="team-edit-btn" disabled={busy || !newTopicTitle.trim()}>
             <Plus size={14} /> Add to queue
           </button>
         </form>
 
-        {pendingTopics.length ? (
-          pendingTopics.map((topic) => (
+        {topics.length ? (
+          topics.map((topic) => (
             <div className="blog-writer-queue-row" key={topic.id}>
               <div className="grow">
-                <strong>{topic.title}</strong>
-                <span>{topic.target_keyword ? `Keyword: ${topic.target_keyword}` : 'No target keyword'} · {topic.status}</span>
+                <strong>{topic.topic}</strong>
+                <span>{topic.notes || 'No notes'}{topic.scheduleName ? ` · from schedule "${topic.scheduleName}"` : ''}</span>
               </div>
-              <button type="button" className="team-edit-btn" onClick={() => handleWriteFromTopic(topic.id)} disabled={busy || topic.status === 'queued'}>
+              <button
+                type="button"
+                className="team-edit-btn"
+                onClick={() => handleWriteFromTopic(topic.id)}
+                disabled={busy || Boolean(activeRequest)}
+              >
                 Write next post
               </button>
               <button type="button" className="team-edit-btn danger" onClick={() => handleDeleteTopic(topic.id)} disabled={busy}>
@@ -325,26 +358,28 @@ export default function AdminBlogWriterPage() {
 
       <div className="blog-writer-section">
         <h3>Recent runs</h3>
-        {requests.length ? (
-          requests.map((req) => (
-            <div className="blog-writer-queue-row" key={req.id} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+        {recentRuns.length ? (
+          recentRuns.map((run) => (
+            <div className="blog-writer-queue-row" key={run.id} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div className="grow">
-                  <strong>{req.topic?.title || req.ad_hoc_title || 'Untitled'}</strong>
-                  <span>{STATUS_LABELS[req.status] || req.status} · queued {formatDate(req.created_at)}{req.error ? ` · ${req.error}` : ''}</span>
+                  <strong>{run.topicLabel || 'Untitled'}</strong>
+                  <span>{RUN_STATUS_LABELS[run.status] || run.status}{run.finishedAt ? ` · ${formatDate(run.finishedAt)}` : ''}{run.error ? ` · ${run.error}` : ''}</span>
                 </div>
-                {req.blog_post ? (
-                  <Link href={`/blog/${req.blog_post.slug}`} className="text-link admin-open-link" target="_blank">
-                    {req.blog_post.published ? 'View post' : 'View draft'} <ExternalLink size={13} />
+                {run.blogSlug ? (
+                  <Link href={`/blog/${run.blogSlug}`} className="text-link admin-open-link" target="_blank">
+                    View post <ExternalLink size={13} />
                   </Link>
                 ) : null}
-                {req.status === 'failed' ? (
-                  <button type="button" className="team-edit-btn" onClick={() => handleRetry(req.id)} disabled={busy}>
+                {run.status === 'failed' ? (
+                  <button type="button" className="team-edit-btn" onClick={() => handleRetry(run.id)} disabled={busy}>
                     <RefreshCw size={14} /> Retry
                   </button>
                 ) : null}
+                <button type="button" className="team-edit-btn" onClick={() => handleDismiss(run.id)} disabled={busy} title="Dismiss">
+                  <X size={14} />
+                </button>
               </div>
-              {req.status === 'running' || req.status === 'waiting' ? <PhaseList steps={req.steps} phase={req.phase} /> : null}
             </div>
           ))
         ) : (
@@ -352,47 +387,61 @@ export default function AdminBlogWriterPage() {
         )}
       </div>
 
-      {settings ? (
+      {defaults ? (
         <div className="blog-writer-section">
-          <h3>Settings</h3>
+          <h3>Queue defaults</h3>
+          <span className="admin-list-meta" style={{ display: 'block', marginBottom: '0.9rem' }}>
+            Applied to any queued topic that doesn't override it itself.
+          </span>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.9rem' }}>
             <input
               type="checkbox"
-              checked={settings.auto_publish_enabled}
-              onChange={(e) => handleSettingsChange('auto_publish_enabled', e.target.checked)}
+              checked={defaults.autoPublish}
+              onChange={(e) => handleDefaultsChange('autoPublish', e.target.checked)}
             />
             Auto-publish when the audit passes (otherwise every post saves as a draft for review)
           </label>
           <div className="blog-writer-inline-form">
-            <label style={{ flex: '1 1 160px' }}>
-              Model
+            <label style={{ flex: '1 1 140px' }}>
+              Posts per run
               <input
-                type="text"
-                value={settings.default_model}
-                onChange={(e) => setSettings({ ...settings, default_model: e.target.value })}
-                onBlur={(e) => handleSettingsChange('default_model', e.target.value)}
+                type="number"
+                min="1"
+                value={defaults.postsPerRun}
+                onChange={(e) => setState((s) => ({ ...s, defaults: { ...s.defaults, postsPerRun: Number(e.target.value) } }))}
+                onBlur={(e) => handleDefaultsChange('postsPerRun', Number(e.target.value))}
               />
             </label>
-            <label style={{ flex: '1 1 160px' }}>
-              Min SEO score
+            <label style={{ flex: '1 1 140px' }}>
+              Images per post
               <input
                 type="number"
                 min="0"
-                max="100"
-                value={settings.min_seo_score}
-                onChange={(e) => setSettings({ ...settings, min_seo_score: Number(e.target.value) })}
-                onBlur={(e) => handleSettingsChange('min_seo_score', Number(e.target.value))}
+                value={defaults.imageCount}
+                onChange={(e) => setState((s) => ({ ...s, defaults: { ...s.defaults, imageCount: Number(e.target.value) } }))}
+                onBlur={(e) => handleDefaultsChange('imageCount', Number(e.target.value))}
               />
             </label>
-            <label style={{ flex: '1 1 160px' }}>
-              Max internal links
+            <label style={{ flex: '1 1 140px' }}>
+              Words per post
               <input
                 type="number"
                 min="0"
-                value={settings.max_internal_links}
-                onChange={(e) => setSettings({ ...settings, max_internal_links: Number(e.target.value) })}
-                onBlur={(e) => handleSettingsChange('max_internal_links', Number(e.target.value))}
+                value={defaults.words}
+                onChange={(e) => setState((s) => ({ ...s, defaults: { ...s.defaults, words: Number(e.target.value) } }))}
+                onBlur={(e) => handleDefaultsChange('words', Number(e.target.value))}
               />
+            </label>
+            <label style={{ flex: '1 1 220px' }}>
+              CTA banner
+              <select
+                value={defaults.ctaVariant}
+                onChange={(e) => handleDefaultsChange('ctaVariant', e.target.value)}
+              >
+                {CTA_VARIANTS.map((v) => (
+                  <option key={v.id} value={v.id}>{v.label}</option>
+                ))}
+              </select>
             </label>
           </div>
         </div>
